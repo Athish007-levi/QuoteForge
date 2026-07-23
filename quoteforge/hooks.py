@@ -256,3 +256,8 @@ app_license = "mit"
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
 
+permission_query_conditions = {
+    "Supplier Bid": "quoteforge.permissions.get_supplier_bid_permission_query"
+}
+
+get_website_user_home_page = "quoteforge.api.get_custom_home_page"

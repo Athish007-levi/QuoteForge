@@ -1,0 +1,155 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+
+<!-- Main Wrapper -->
+<div>
+    <h1>Open Quotation Requests</h1>
+    <p>Public Supplier Portal</p>
+    
+    <p>
+        {% if frappe.session.user == "Guest" %}
+            <a href="/login?redirect=/open_rfqs">Staff Login</a>
+        {% else %}
+            User: {{ frappe.session.user }} | <a href="/logout">Logout</a>
+        {% endif %}
+    </p>
+    <hr>
+
+    <!-- RFQ LISTINGS -->
+    {% if not rfqs %}
+
+        <p>There are currently no active RFQs accepting bids.</p>
+
+    {% else %}
+
+        {% for rfq in rfqs %}
+            <!-- SINGLE RFQ SECTION -->
+            <h2>{{ rfq.title or rfq.name }}</h2>
+            <p><strong>RFQ ID:</strong> {{ rfq.name }}</p>
+            <p><strong>Closing Date:</strong> {{ rfq.closing__datetime or "N/A" }}</p>
+            <p><strong>Status:</strong> OPEN</p>
+            <p><strong>Summary:</strong> {{ rfq.summary or "No summary provided." }}</p>
+
+            <h3>Requested Items:</h3>
+            {% if rfq.rfq_items %}
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Quantity</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in rfq.rfq_items %}
+                        <tr>
+                            <td>{{ item.item_name }}</td>
+                            <td>{{ item.qty }}</td>
+                            <td>{{ item.description or "-" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No specific item list attached.</p>
+            {% endif %}
+
+            <br>
+            <!-- BUTTON TO SHOW FORM -->
+            <button onclick="openBidForm('{{ rfq.name }}', '{{ rfq.title or rfq.name }}')">
+                Submit Quotation
+            </button>
+
+            <hr>
+        {% endfor %}
+
+    {% endif %}
+
+</div>
+
+<br>
+
+<!-- SUBMIT BID FORM SECTION (Hidden by default) -->
+<div id="bidFormSection" style="display: none; border: 2px solid black; padding: 15px;">
+    <h2 id="formTitle">Submit Quotation</h2>
+    
+    <form id="supplierBidForm">
+        <input type="hidden" id="rfq_name">
+
+        <p>
+            <label>Supplier / Company Name *</label><br>
+            <input type="text" id="supplier_name" required>
+        </p>
+
+        <p>
+            <label>Contact Email *</label><br>
+            <input type="email" id="email" required>
+        </p>
+
+        <p>
+            <label>Total Quoted Price ($) *</label><br>
+            <input type="number" step="0.01" id="price" required>
+        </p>
+
+        <p>
+            <label>Delivery Lead Time (Days) *</label><br>
+            <input type="number" id="delivery_days" required>
+        </p>
+
+        <p>
+            <label>Remarks / Terms</label><br>
+            <textarea id="remarks" rows="3"></textarea>
+        </p>
+
+        <p>
+            <button type="submit" id="submitBidBtn">Send Quotation</button>
+            <button type="button" onclick="closeBidForm()">Cancel</button>
+        </p>
+    </form>
+</div>
+
+<!-- JAVASCRIPT LOGIC -->
+<script>
+function openBidForm(rfqName, rfqTitle) {
+    document.getElementById('rfq_name').value = rfqName;
+    document.getElementById('formTitle').innerText = "Submit Quotation for " + rfqTitle;
+    document.getElementById('bidFormSection').style.display = 'block';
+    window.scrollTo(0, document.body.scrollHeight);
+}
+
+function closeBidForm() {
+    document.getElementById('bidFormSection').style.display = 'none';
+}
+
+document.getElementById('supplierBidForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    var btn = document.getElementById('submitBidBtn');
+    btn.disabled = true;
+    btn.innerText = "Submitting...";
+
+    frappe.call({
+        method: "quoteforge.api.submit_supplier_bid",
+        args: {
+            rfq: document.getElementById('rfq_name').value,
+            supplier_name: document.getElementById('supplier_name').value,
+            email: document.getElementById('email').value,
+            price: document.getElementById('price').value,
+            delivery_days: document.getElementById('delivery_days').value,
+            remarks: document.getElementById('remarks').value
+        },
+        callback: function(r) {
+            if (!r.exc) {
+                alert("Your quotation has been submitted successfully!");
+                closeBidForm();
+                document.getElementById('supplierBidForm').reset();
+            }
+            btn.disabled = false;
+            btn.innerText = "Send Quotation";
+        }
+    });
+});
+</script>
+
+{% endblock %}

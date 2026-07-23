@@ -1,0 +1,68 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+
+<!-- Main Wrapper -->
+<div>
+    <h1>Buyer Evaluation Portal</h1>
+    <p>User: {{ frappe.session.user }} | <a href="/logout">Logout</a></p>
+    <hr>
+
+    {% if not rfqs %}
+
+        <p>No RFQs available for evaluation.</p>
+
+    {% else %}
+
+        {% for rfq in rfqs %}
+            <!-- RFQ Section -->
+            <h2>{{ rfq.title or rfq.name }}</h2>
+            <p><strong>RFQ ID:</strong> {{ rfq.name }}</p>
+            <p><strong>Closing Date:</strong> {{ rfq.closing__datetime or 'N/A' }}</p>
+            <p><strong>Status:</strong> {{ rfq.status }}</p>
+            <p><strong>Summary:</strong> {{ rfq.summary or 'No summary provided.' }}</p>
+
+            {% if rfq.status == 'Open' %}
+
+                <p><strong>Note:</strong> Bids are currently sealed. Pricing will be available after the RFQ is Closed.</p>
+
+            {% else %}
+
+                <h3>Submitted Bids</h3>
+
+                {% if not rfq.bids %}
+                    <p>No bids received.</p>
+                {% else %}
+                    <table border="1">
+                        <thead>
+                            <tr>
+                                <th>Supplier Name</th>
+                                <th>Email</th>
+                                <th>Price</th>
+                                <th>Delivery Days</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for bid in rfq.bids %}
+                            <tr>
+                                <td>{{ bid.supplier_name }}</td>
+                                <td>{{ bid.contact_email }}</td>
+                                <td>${{ bid.total_quoted_price }}</td>
+                                <td>{{ bid.delivery_days }}</td>
+                                <td>{{ bid.remarks or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+
+            {% endif %}
+
+            <hr>
+        {% endfor %}
+
+    {% endif %}
+</div>
+
+{% endblock %}
