@@ -1,13 +1,15 @@
 import frappe
+import json
 
 @frappe.whitelist(allow_guest=True)
 def submit_supplier_bid(rfq, supplier_name, email, price, delivery_days, remarks=None):
-    #Verify open
+    # Verify open
     rfq_status = frappe.db.get_value("RFQ", rfq, "status")
+
     if rfq_status != "Open":
         frappe.throw("This RFQ is no longer open for bidding.")
 
-    #Supplier Bid
+    # Supplier bid
     bid = frappe.get_doc({
         "doctype": "Supplier Bid",
         "rfq": rfq,
@@ -21,15 +23,19 @@ def submit_supplier_bid(rfq, supplier_name, email, price, delivery_days, remarks
     bid.insert(ignore_permissions=True)
     frappe.db.commit()
 
-    return {"status": "success", "message": "Quotation submitted successfully!"}
-
-
+    return {
+        "status": "success",
+        "message": "Quotation submitted successfully!"
+    }
 
 @frappe.whitelist()
-def create_new_rfq(title, summary, closing_date):
+def create_new_rfq(title, summary, closing_date, items):
     user_roles = frappe.get_roles(frappe.session.user)
+
     if "Procurement Admin" not in user_roles and "System Manager" not in user_roles:
         frappe.throw("Permission Denied: Only Procurement Admins can create RFQs.")
+
+    items = json.loads(items)
 
     new_rfq = frappe.get_doc({
         "doctype": "RFQ",
@@ -38,14 +44,42 @@ def create_new_rfq(title, summary, closing_date):
         "closing__datetime": closing_date,
         "status": "Open"
     })
-    
+
+    for item in items:
+        new_rfq.append("items_needed", {
+            "item_name": item.get("item_name"),
+            "qty": item.get("qty"),
+            "description": item.get("description")
+        })
+
     new_rfq.insert(ignore_permissions=True)
     frappe.db.commit()
 
-    return {"status": "success", "name": new_rfq.name}
+    return {
+        "status": "success",
+        "name": new_rfq.name
+    }
+
+@frappe.whitelist()
+def close_rfq(rfq):
+    user_roles = frappe.get_roles(frappe.session.user)
+
+    if "Procurement Admin" not in user_roles and "System Manager" not in user_roles:
+        frappe.throw("Permission Denied.")
+
+    doc = frappe.get_doc("RFQ", rfq)
+
+    doc.status = "Closed"
+    doc.save(ignore_permissions=True)
+
+    frappe.db.commit()
+
+    return {
+        "status": "success",
+        "message": "RFQ closed successfully."
+    }
 
 
-    import frappe
 
 def get_custom_home_page(user):
     # Get all roles assigned to the logged-in user

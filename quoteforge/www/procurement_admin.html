@@ -2,104 +2,210 @@
 
 {% block page_content %}
 
-<!-- Main Wrapper -->
 <div>
+    <h1>QuoteForge</h1>
+    <p><strong>Procurement Admin Dashboard</strong></p>
+
+    <p>
+        Logged in as:
+        <strong>{{ frappe.session.user }}</strong>
+        |
+        <a href="/logout">Logout</a>
+    </p>
+
+    <hr>
 
     {% if access_denied %}
 
-        <!-- ACCESS DENIED ALERT -->
         <h2>Access Denied</h2>
-        <p>Your user account (<strong>{{ frappe.session.user }}</strong>) does not have the Procurement Admin role.</p>
-        <p><a href="/logout">Log Out & Switch User</a></p>
+        <p>You do not have permission to access this portal.</p>
 
     {% else %}
 
-        <!-- HEADER -->
-        <h1>Procurement Admin Portal</h1>
-        <p>Logged in as: {{ frappe.session.user }} | <a href="/logout">Logout</a></p>
-        <hr>
+        <h2>Create New RFQ</h2>
 
-        <!-- CREATE NEW RFQ FORM -->
-        <h2>Create New Request for Quotation (RFQ)</h2>
-        
-        <form id="createRfqForm">
+        <form id="createRFQForm">
+
             <p>
                 <label>RFQ Title *</label><br>
-                <input type="text" id="new_title" placeholder="e.g. Purchase of Office Supplies" required>
+                <input type="text" id="rfq_title" required>
             </p>
 
             <p>
-                <label>Closing Date & Time *</label><br>
-                <input type="datetime-local" id="new_closing_date" required>
+                <label>Summary *</label><br>
+                <textarea id="rfq_summary" rows="3" required></textarea>
             </p>
 
             <p>
-                <label>Summary / Requirements *</label><br>
-                <textarea id="new_summary" rows="3" placeholder="Describe requirements..." required></textarea>
+                <label>Closing Date *</label><br>
+                <input type="datetime-local" id="closing_date" required>
             </p>
 
-            <p>
-                <button type="submit" id="createBtn">Publish Open RFQ</button>
-            </p>
+            <h3>Items Needed</h3>
+
+            <table border="1" cellpadding="8" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Quantity</th>
+                        <th>Description</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody id="itemsBody">
+                    <tr>
+                        <td>
+                            <input type="text" class="item_name" required>
+                        </td>
+                        <td>
+                            <input type="number" class="qty" required>
+                        </td>
+                        <td>
+                            <input type="text" class="description">
+                        </td>
+                        <td>
+                            <button type="button" onclick="removeItem(this)">
+                                Remove
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <br>
+
+            <button type="button" onclick="addItem()">
+                Add Item
+            </button>
+
+            <br><br>
+
+            <button type="submit">
+                Create RFQ
+            </button>
+
         </form>
 
         <hr>
 
-        <!-- EXISTING RFQ LISTING -->
         <h2>Existing RFQs</h2>
 
         {% if not rfqs %}
 
-            <p>No RFQs created yet.</p>
+            <p>No RFQs have been created yet.</p>
 
         {% else %}
 
             {% for rfq in rfqs %}
-                <!-- SINGLE RFQ SECTION -->
-                <h3>{{ rfq.title or rfq.name }} ({{ rfq.name }})</h3>
-                <p><strong>Closing Date:</strong> {{ rfq.closing__datetime or 'N/A' }}</p>
-                <p><strong>Status:</strong> {{ rfq.status }}</p>
 
-                {% if rfq.status == 'Open' %}
-                    <button onclick="closeRFQ('{{ rfq.name }}')">Close Bidding</button>
-                {% endif %}
+                <hr>
 
-                <p><strong>Summary:</strong> {{ rfq.summary or 'No summary provided.' }}</p>
+                <h2>{{ rfq.title or rfq.name }}</h2>
 
-                <h4>Submitted Bids</h4>
+                <p>
+                    <strong>RFQ ID:</strong>
+                    {{ rfq.name }}
+                </p>
 
-                {% if not rfq.bids %}
+                <p>
+                    <strong>Status:</strong>
+                    {{ rfq.status }}
+                </p>
 
-                    <p>No bids submitted yet for this RFQ.</p>
+                <p>
+                    <strong>Closing Date:</strong>
+                    {{ rfq.closing__datetime or "N/A" }}
+                </p>
 
-                {% else %}
+                <p>
+                    <strong>Summary:</strong>
+                    {{ rfq.summary or "No summary provided." }}
+                </p>
 
-                    <table border="1">
+                <h3>Requested Items</h3>
+
+                {% if rfq.rfq_items %}
+
+                    <table border="1" cellpadding="8" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>Supplier Name</th>
-                                <th>Email</th>
-                                <th>Price ($)</th>
-                                <th>Delivery (Days)</th>
-                                <th>Remarks</th>
+                                <th>Item Name</th>
+                                <th>Quantity</th>
+                                <th>Description</th>
                             </tr>
                         </thead>
+
                         <tbody>
-                            {% for bid in rfq.bids %}
-                            <tr>
-                                <td>{{ bid.supplier_name }}</td>
-                                <td>{{ bid.contact_email }}</td>
-                                <td>${{ bid.total_quoted_price }}</td>
-                                <td>{{ bid.delivery_days }}</td>
-                                <td>{{ bid.remarks or '-' }}</td>
-                            </tr>
+                            {% for item in rfq.rfq_items %}
+                                <tr>
+                                    <td>{{ item.item_name }}</td>
+                                    <td>{{ item.qty }}</td>
+                                    <td>{{ item.description or "-" }}</td>
+                                </tr>
                             {% endfor %}
                         </tbody>
                     </table>
 
+                {% else %}
+
+                    <p>No items have been added to this RFQ.</p>
+
                 {% endif %}
 
-                <hr>
+                <br>
+
+                {% if rfq.status == "Open" %}
+
+                    <button
+                        type="button"
+                        onclick="closeRFQ('{{ rfq.name }}')"
+                    >
+                        Close RFQ
+                    </button>
+
+                {% else %}
+
+                    <p>
+                        <strong>This RFQ is closed.</strong>
+                    </p>
+
+                {% endif %}
+
+                <h3>Submitted Supplier Bids</h3>
+
+                {% if rfq.bids %}
+
+                    <table border="1" cellpadding="8" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Supplier Name</th>
+                                <th>Email</th>
+                                <th>Quoted Price</th>
+                                <th>Delivery Days</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for bid in rfq.bids %}
+                                <tr>
+                                    <td>{{ bid.supplier_name }}</td>
+                                    <td>{{ bid.contact_email }}</td>
+                                    <td>{{ bid.total_quoted_price }}</td>
+                                    <td>{{ bid.delivery_days }}</td>
+                                    <td>{{ bid.remarks or "-" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                {% else %}
+
+                    <p>No supplier bids have been submitted.</p>
+
+                {% endif %}
+
             {% endfor %}
 
         {% endif %}
@@ -108,50 +214,90 @@
 
 </div>
 
-
 <script>
-document.getElementById('createRfqForm')?.addEventListener('submit', function(e) {
+
+function addItem() {
+    var row = `
+        <tr>
+            <td>
+                <input type="text" class="item_name" required>
+            </td>
+            <td>
+                <input type="number" class="qty" required>
+            </td>
+            <td>
+                <input type="text" class="description">
+            </td>
+            <td>
+                <button type="button" onclick="removeItem(this)">
+                    Remove
+                </button>
+            </td>
+        </tr>
+    `;
+
+    document.getElementById("itemsBody").insertAdjacentHTML("beforeend", row);
+}
+
+function removeItem(button) {
+    var rows = document.querySelectorAll("#itemsBody tr");
+
+    if (rows.length > 1) {
+        button.closest("tr").remove();
+    } else {
+        alert("At least one item is required.");
+    }
+}
+
+document.getElementById("createRFQForm").addEventListener("submit", function(e) {
     e.preventDefault();
-    var btn = document.getElementById('createBtn');
-    btn.disabled = true;
+
+    var items = [];
+
+    document.querySelectorAll("#itemsBody tr").forEach(function(row) {
+        items.push({
+            item_name: row.querySelector(".item_name").value,
+            qty: row.querySelector(".qty").value,
+            description: row.querySelector(".description").value
+        });
+    });
 
     frappe.call({
         method: "quoteforge.api.create_new_rfq",
         args: {
-            title: document.getElementById('new_title').value,
-            closing_date: document.getElementById('new_closing_date').value,
-            summary: document.getElementById('new_summary').value
+            title: document.getElementById("rfq_title").value,
+            summary: document.getElementById("rfq_summary").value,
+            closing_date: document.getElementById("closing_date").value,
+            items: JSON.stringify(items)
         },
         callback: function(r) {
             if (!r.exc) {
-                alert("RFQ Published Successfully!");
+                alert("RFQ created successfully!");
                 location.reload();
-            } else {
-                btn.disabled = false;
             }
         }
     });
 });
 
 function closeRFQ(rfqName) {
-    if (confirm("Close bidding for " + rfqName + "?")) {
-        frappe.call({
-            method: "frappe.client.set_value",
-            args: {
-                doctype: "RFQ",
-                name: rfqName,
-                fieldname: "status",
-                value: "Closed"
-            },
-            callback: function(r) {
-                if (!r.exc) {
-                    alert("RFQ Status set to Closed!");
-                    location.reload();
-                }
-            }
-        });
+    if (!confirm("Are you sure you want to close this RFQ?")) {
+        return;
     }
+
+    frappe.call({
+        method: "quoteforge.api.close_rfq",
+        args: {
+            rfq: rfqName
+        },
+        callback: function(r) {
+            if (!r.exc) {
+                alert("RFQ closed successfully!");
+                location.reload();
+            }
+        }
+    });
 }
+
 </script>
 
 {% endblock %}
