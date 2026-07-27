@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2026-07-27 10:40:19.879827",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-07-27 10:40:19.879827",
+ "modified_by": "Administrator",
+ "module": "Quoteforge",
+ "name": "buyer_portal",
+ "owner": "Administrator",
+ "page_name": "buyer_portal",
+ "roles": [
+  {
+   "role": "Buyer"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Buyerportal"
+}

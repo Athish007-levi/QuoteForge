@@ -80,23 +80,100 @@ def close_rfq(rfq):
     }
 
 
+@frappe.whitelist()
+def get_procurement_data():
+    roles = frappe.get_roles(frappe.session.user)
 
-def get_custom_home_page(user):
-    # Get all roles assigned to the logged-in user
-    roles = frappe.get_roles(user)
+    if "Procurement Admin" not in roles and "System Manager" not in roles:
+        frappe.throw("Permission Denied")
 
-    # 1. Procurement Admin Redirect
+    rfqs = frappe.get_all(
+        "RFQ",
+        fields=["name", "status", "creation"],
+        order_by="creation desc",
+        ignore_permissions=True
+    )
+
+    for rfq in rfqs:
+        doc = frappe.get_doc("RFQ", rfq["name"])
+
+        rfq["title"] = getattr(doc, "title", None) or doc.name
+
+        rfq["summary"] = (
+            getattr(doc, "summary", None)
+            or getattr(doc, "description", "No summary provided.")
+        )
+
+        rfq["closing__datetime"] = str(
+            getattr(doc, "closing__datetime", None)
+            or getattr(doc, "closing_datetime", None)
+            or getattr(doc, "closing_date", "N/A")
+        )
+
+        rfq["rfq_items"] = []
+
+        for item in doc.items_needed:
+            rfq["rfq_items"].append({
+                "item_name": item.item_name,
+                "qty": item.qty,
+                "description": item.description
+            })
+
+        rfq["bids"] = frappe.get_all(
+            "Supplier Bid",
+            filters={"rfq": doc.name},
+            fields=[
+                "name",
+                "supplier_name",
+                "contact_email",
+                "total_quoted_price",
+                "delivery_days",
+                "remarks"
+            ],
+            ignore_permissions=True
+        )
+
+    return {
+        "rfqs": rfqs
+    }
+
+
+@frappe.whitelist()
+def get_buyer_evaluation_data():
+    user_roles = frappe.get_roles(frappe.session.user)
+
+    if "Buyer" not in user_roles and "System Manager" not in user_roles:
+        frappe.throw("Access Denied: You must be a Buyer to view this page.", frappe.PermissionError)
+
+    rfqs = frappe.get_all(
+        "RFQ",
+        fields=["name", "title", "status", "closing__datetime", "summary"],
+        ignore_permissions=True
+    )
+
+    for rfq in rfqs:
+        rfq["bids"] = frappe.get_all(
+            "Supplier Bid",
+            filters={"rfq": rfq["name"]},
+            fields=[
+                "name",
+                "supplier_name",
+                "contact_email",
+                "total_quoted_price",
+                "delivery_days",
+                "remarks"
+            ]
+        )
+
+    return {
+        "rfqs": rfqs
+    }
+
+def redirect_after_login(login_manager):
+    roles = frappe.get_roles(frappe.session.user)
+
     if "Procurement Admin" in roles:
-        return "procurement_admin"
+        frappe.local.response["home_page"] = "/app/procure_admin"
 
-    # 2. Buyer Redirect
-    if "Buyer" in roles:
-        return "buyer_portal"  # Replace with your actual Buyer page route name
-
-    # 3. Fallback for all other logged-in users or System Managers
-    if "System Manager" in roles:
-        return "app"  # Sends System Managers to Desk
-
-    # Default Public Page
-    return "open_rfqs"
-
+    elif "Buyer" in roles:
+        frappe.local.response["home_page"] = "/app/buyer_portal"
