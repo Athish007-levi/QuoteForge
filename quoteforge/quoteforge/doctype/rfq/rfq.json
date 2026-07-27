@@ -12,7 +12,12 @@
   "closing__datetime",
   "summary",
   "section_break_cnua",
-  "items_needed"
+  "items_needed",
+  "section_break_cuon",
+  "awarded_supplier",
+  "awarded_value",
+  "award_date",
+  "final_status"
  ],
  "fields": [
   {
@@ -51,12 +56,37 @@
    "fieldtype": "Table",
    "label": "Items Needed",
    "options": "RFQ Item"
+  },
+  {
+   "fieldname": "awarded_supplier",
+   "fieldtype": "Data",
+   "label": "Awarded Supplier"
+  },
+  {
+   "fieldname": "awarded_value",
+   "fieldtype": "Currency",
+   "label": "Awarded Value"
+  },
+  {
+   "fieldname": "award_date",
+   "fieldtype": "Datetime",
+   "label": "Award Date"
+  },
+  {
+   "fieldname": "final_status",
+   "fieldtype": "Select",
+   "label": "Final Status",
+   "options": "Pending\nAwarded"
+  },
+  {
+   "fieldname": "section_break_cuon",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-22 15:23:29.780563",
+ "modified": "2026-07-27 16:58:15.374263",
  "modified_by": "Administrator",
  "module": "Quoteforge",
  "name": "RFQ",

@@ -21,18 +21,13 @@ frappe.pages['buyer_portal'].on_page_load = function(wrapper) {
 					</td>
 				</tr>
 			</table>
-
 			<hr>
-
 			<h2>RFQ Evaluation</h2>
-
 			<p>
 				Review supplier quotations and evaluate bids submitted
 				for your procurement requests.
 			</p>
-
 			<br>
-
 			<div id="rfqList">
 				<p>Loading RFQs...</p>
 			</div>
@@ -48,9 +43,7 @@ function load_buyer_rfqs(wrapper) {
 		callback: function(r) {
 			if (r.exc) {
 				$(wrapper).find("#rfqList").html(`
-					<p>
-						Unable to load RFQ evaluation data.
-					</p>
+					<p>Unable to load RFQ evaluation data.</p>
 				`);
 				return;
 			}
@@ -72,7 +65,6 @@ function load_buyer_rfqs(wrapper) {
 						</tr>
 					</table>
 				`);
-
 				return;
 			}
 
@@ -83,30 +75,21 @@ function load_buyer_rfqs(wrapper) {
 					<table width="100%" border="1" cellpadding="12" cellspacing="0">
 						<tr>
 							<td colspan="2">
-								<h2>
-									${rfq.title || rfq.name}
-								</h2>
+								<h2>${rfq.title || rfq.name}</h2>
 							</td>
 						</tr>
-
 						<tr>
 							<td width="25%">
 								<strong>RFQ ID</strong>
 							</td>
-							<td>
-								${rfq.name}
-							</td>
+							<td>${rfq.name}</td>
 						</tr>
-
 						<tr>
 							<td>
 								<strong>Closing Date</strong>
 							</td>
-							<td>
-								${rfq.closing__datetime || "Not specified"}
-							</td>
+							<td>${rfq.closing__datetime || "Not specified"}</td>
 						</tr>
-
 						<tr>
 							<td>
 								<strong>Status</strong>
@@ -115,17 +98,13 @@ function load_buyer_rfqs(wrapper) {
 								<strong>${rfq.status}</strong>
 							</td>
 						</tr>
-
 						<tr>
 							<td>
 								<strong>Summary</strong>
 							</td>
-							<td>
-								${rfq.summary || "No summary provided."}
-							</td>
+							<td>${rfq.summary || "No summary provided."}</td>
 						</tr>
 					</table>
-
 					<br>
 				`;
 
@@ -135,11 +114,7 @@ function load_buyer_rfqs(wrapper) {
 							<tr>
 								<td>
 									<h3>Sealed Bidding</h3>
-
-									<p>
-										Supplier bids are currently sealed.
-									</p>
-
+									<p>Supplier bids are currently sealed.</p>
 									<p>
 										Bid pricing and supplier details
 										will become available after this RFQ
@@ -177,9 +152,9 @@ function load_buyer_rfqs(wrapper) {
 										<th align="left">Quoted Price</th>
 										<th align="left">Delivery Days</th>
 										<th align="left">Remarks</th>
+										<th align="left">Action</th>
 									</tr>
 								</thead>
-
 								<tbody>
 						`;
 
@@ -191,6 +166,20 @@ function load_buyer_rfqs(wrapper) {
 									<td>${bid.total_quoted_price}</td>
 									<td>${bid.delivery_days}</td>
 									<td>${bid.remarks || "-"}</td>
+									<td>
+										${
+											rfq.final_status === "Awarded"
+												? "<strong>Award Completed</strong>"
+												: `
+													<button
+														class="award-supplier"
+														data-rfq="${rfq.name}"
+														data-bid="${bid.name}">
+														Select Award
+													</button>
+												`
+										}
+									</td>
 								</tr>
 							`;
 						});
@@ -202,6 +191,38 @@ function load_buyer_rfqs(wrapper) {
 					}
 				}
 
+				if (rfq.final_status === "Awarded") {
+					html += `
+						<br>
+						<table width="100%" border="1" cellpadding="10" cellspacing="0">
+							<tr>
+								<td>
+									<strong>Award Status</strong>
+								</td>
+								<td>
+									Awarded
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<strong>Awarded Supplier</strong>
+								</td>
+								<td>
+									${rfq.awarded_supplier || "-"}
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<strong>Awarded Value</strong>
+								</td>
+								<td>
+									${rfq.awarded_value || "-"}
+								</td>
+							</tr>
+						</table>
+					`;
+				}
+
 				html += `
 					<br>
 					<hr>
@@ -210,6 +231,33 @@ function load_buyer_rfqs(wrapper) {
 			});
 
 			rfqList.html(html);
+
+			$(wrapper).find(".award-supplier").on("click", function() {
+				var rfq = $(this).data("rfq");
+				var bid = $(this).data("bid");
+
+				award_supplier(rfq, bid);
+			});
+		}
+	});
+}
+
+function award_supplier(rfq, supplier_bid) {
+	if (!confirm("Are you sure you want to award this supplier?")) {
+		return;
+	}
+
+	frappe.call({
+		method: "quoteforge.api.award_supplier",
+		args: {
+			rfq: rfq,
+			supplier_bid: supplier_bid
+		},
+		callback: function(r) {
+			if (!r.exc) {
+				alert("Supplier awarded successfully!");
+				location.reload();
+			}
 		}
 	});
 }

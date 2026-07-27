@@ -89,7 +89,15 @@ def get_procurement_data():
 
     rfqs = frappe.get_all(
         "RFQ",
-        fields=["name", "status", "creation"],
+        fields=[
+            "name",
+            "status",
+            "creation",
+            "final_status",
+            "awarded_supplier",
+            "awarded_value",
+            "award_date"
+        ],
         order_by="creation desc",
         ignore_permissions=True
     )
@@ -137,21 +145,34 @@ def get_procurement_data():
         "rfqs": rfqs
     }
 
-
 @frappe.whitelist()
 def get_buyer_evaluation_data():
     user_roles = frappe.get_roles(frappe.session.user)
 
     if "Buyer" not in user_roles and "System Manager" not in user_roles:
-        frappe.throw("Access Denied: You must be a Buyer to view this page.", frappe.PermissionError)
+        frappe.throw(
+            "Access Denied: You must be a Buyer to view this page.",
+            frappe.PermissionError
+        )
 
     rfqs = frappe.get_all(
         "RFQ",
-        fields=["name", "title", "status", "closing__datetime", "summary"],
+        fields=[
+            "name",
+            "title",
+            "status",
+            "closing__datetime",
+            "summary",
+            "final_status",
+            "awarded_supplier",
+            "awarded_value",
+            "award_date"
+        ],
         ignore_permissions=True
     )
 
     for rfq in rfqs:
+
         rfq["bids"] = frappe.get_all(
             "Supplier Bid",
             filters={"rfq": rfq["name"]},
@@ -162,7 +183,8 @@ def get_buyer_evaluation_data():
                 "total_quoted_price",
                 "delivery_days",
                 "remarks"
-            ]
+            ],
+            ignore_permissions=True
         )
 
     return {
@@ -177,3 +199,41 @@ def redirect_after_login(login_manager):
 
     elif "Buyer" in roles:
         frappe.local.response["home_page"] = "/app/buyer_portal"
+
+
+@frappe.whitelist()
+def award_supplier(rfq, supplier_bid):
+    if frappe.session.user == "Guest":
+        frappe.throw("Login required.")
+
+    user_roles = frappe.get_roles(frappe.session.user)
+
+    if "Buyer" not in user_roles and "System Manager" not in user_roles:
+        frappe.throw("Only Buyers can award a supplier.")
+
+    rfq_doc = frappe.get_doc("RFQ", rfq)
+
+    if rfq_doc.status != "Closed":
+        frappe.throw("Supplier can only be awarded after the RFQ is closed.")
+
+    bid = frappe.get_doc("Supplier Bid", supplier_bid)
+
+    if bid.rfq != rfq:
+        frappe.throw("This supplier bid does not belong to this RFQ.")
+
+    if rfq_doc.final_status == "Awarded":
+        frappe.throw("An award has already been made for this RFQ.")
+
+    rfq_doc.awarded_supplier = bid.supplier_name
+    rfq_doc.awarded_value = bid.total_quoted_price
+    rfq_doc.award_date = frappe.utils.now_datetime()
+    rfq_doc.final_status = "Awarded"
+
+    rfq_doc.save(ignore_permissions=True)
+
+    frappe.db.commit()
+
+    return {
+        "status": "success",
+        "message": "Supplier awarded successfully."
+    }

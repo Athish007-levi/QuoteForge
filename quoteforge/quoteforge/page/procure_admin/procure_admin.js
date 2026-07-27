@@ -226,7 +226,40 @@ function load_rfqs(wrapper) {
 				} else {
 					html += "<p>No supplier bids have been submitted.</p>";
 				}
-			});
+
+				html += `
+	<br>
+
+	<h3>Award Details</h3>
+
+	<table border="1" cellpadding="8" cellspacing="0">
+		<tr>
+			<td><strong>Final Status</strong></td>
+			<td>${rfq.final_status || "Pending"}</td>
+		</tr>
+
+		<tr>
+			<td><strong>Awarded Supplier</strong></td>
+			<td>${rfq.awarded_supplier || "-"}</td>
+		</tr>
+
+		<tr>
+			<td><strong>Awarded Value</strong></td>
+			<td>${rfq.awarded_value || "-"}</td>
+		</tr>
+
+		<tr>
+			<td><strong>Award Date</strong></td>
+			<td>${rfq.award_date || "-"}</td>
+		</tr>
+	</table>
+
+	<br>
+`;
+
+});
+
+			
 
 			rfqList.html(html);
 
