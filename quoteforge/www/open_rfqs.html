@@ -2,735 +2,323 @@
 
 {% block page_content %}
 
-<!-- =====================================================
-     QUOTEFORGE SUPPLIER PORTAL
-====================================================== -->
-
-<div>
-
-    <!-- HEADER -->
-    <table width="100%" cellpadding="15" cellspacing="0" border="0">
-
-        <tr>
-
-            <td>
-
-                <h1>QuoteForge</h1>
-
-                <p>
-                    <strong>Supplier Quotation Portal</strong>
-                </p>
-
-            </td>
-
-            <td align="right">
-
-                {% if frappe.session.user == "Guest" %}
-
-                    <a href="/login?redirect=/open_rfqs">
-                        Staff Login
-                    </a>
-
-                {% else %}
-
-                    <p>
-                        User:
-                        <strong>
-                            {{ frappe.session.user }}
-                        </strong>
-                    </p>
-
-                    <a href="/logout">
-                        Logout
-                    </a>
-
-                {% endif %}
-
-            </td>
-
-        </tr>
-
-    </table>
-
-
-    <hr>
-
-
-    <!-- PAGE INTRODUCTION -->
-
-    <h2>Open Request for Quotations</h2>
-
-    <p>
-        Review active procurement requests and submit your
-        quotation before the specified closing date.
-    </p>
-
-
-    <br>
-
-
-    <!-- RFQ LISTINGS -->
-
-    {% if not rfqs %}
-
-        <table
-            width="100%"
-            border="1"
-            cellpadding="20"
-            cellspacing="0"
-        >
-
-            <tr>
-
-                <td align="center">
-
-                    <h3>
-                        No Active RFQs
-                    </h3>
-
-                    <p>
-                        There are currently no active RFQs accepting bids.
-                    </p>
-
-                </td>
-
-            </tr>
-
-        </table>
-
-
-    {% else %}
-
-
-        {% for rfq in rfqs %}
-
-
-            <!-- RFQ DETAILS -->
-
-            <table
-                width="100%"
-                border="1"
-                cellpadding="12"
-                cellspacing="0"
-            >
-
-                <!-- RFQ TITLE -->
-
-                <tr>
-
-                    <td colspan="2">
-
-                        <h2>
-                            {{ rfq.title or rfq.name }}
-                        </h2>
-
-                    </td>
-
-                </tr>
-
-
-                <!-- RFQ ID -->
-
-                <tr>
-
-                    <td width="25%">
-
-                        <strong>
-                            RFQ ID
-                        </strong>
-
-                    </td>
-
-                    <td>
-
-                        {{ rfq.name }}
-
-                    </td>
-
-                </tr>
-
-
-                <!-- CLOSING DATE -->
-
-                <tr>
-
-                    <td>
-
-                        <strong>
-                            Closing Date
-                        </strong>
-
-                    </td>
-
-                    <td>
-
-                        {{ rfq.closing__datetime or "N/A" }}
-
-                    </td>
-
-                </tr>
-
-
-                <!-- STATUS -->
-
-                <tr>
-
-                    <td>
-
-                        <strong>
-                            Status
-                        </strong>
-
-                    </td>
-
-                    <td>
-
-                        <strong>
-                            OPEN
-                        </strong>
-
-                    </td>
-
-                </tr>
-
-
-                <!-- SUMMARY -->
-
-                <tr>
-
-                    <td>
-
-                        <strong>
-                            Summary
-                        </strong>
-
-                    </td>
-
-                    <td>
-
-                        {{ rfq.summary or "No summary provided." }}
-
-                    </td>
-
-                </tr>
-
-            </table>
-
-
-            <br>
-
-
-            <!-- REQUESTED ITEMS -->
-
-            <h3>
-                Requested Items
-            </h3>
-
-
-            {% if rfq.rfq_items %}
-
-
-                <table
-                    width="100%"
-                    border="1"
-                    cellpadding="10"
-                    cellspacing="0"
-                >
-
-                    <thead>
-
-                        <tr>
-
-                            <th align="left">
-                                Item Name
-                            </th>
-
-                            <th align="left">
-                                Quantity
-                            </th>
-
-                            <th align="left">
-                                Description
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-
-                        {% for item in rfq.rfq_items %}
-
-
-                            <tr>
-
-                                <td>
-
-                                    {{ item.item_name }}
-
-                                </td>
-
-
-                                <td>
-
-                                    {{ item.qty }}
-
-                                </td>
-
-
-                                <td>
-
-                                    {{ item.description or "-" }}
-
-                                </td>
-
-                            </tr>
-
-
-                        {% endfor %}
-
-
-                    </tbody>
-
-                </table>
-
-
-            {% else %}
-
-
-                <p>
-                    No specific item list attached.
-                </p>
-
-
-            {% endif %}
-
-
-            <br>
-
-
-            <!-- SUBMIT QUOTATION ACTION -->
-
-            <table
-                width="100%"
-                border="1"
-                cellpadding="15"
-                cellspacing="0"
-            >
-
-                <tr>
-
-                    <td>
-
-                        <h3>
-                            Submit Your Quotation
-                        </h3>
-
-                        <p>
-                            If you are interested in supplying the
-                            requested items, submit your quotation
-                            using the form below.
-                        </p>
-
-
-                        <button
-                            type="button"
-                            onclick="openBidForm(
-                                '{{ rfq.name }}',
-                                '{{ rfq.title or rfq.name }}'
-                            )"
-                        >
-
-                            Submit Quotation
-
-                        </button>
-
-                    </td>
-
-                </tr>
-
-            </table>
-
-
-            <br>
-
-            <hr>
-
-            <br>
-
-
-        {% endfor %}
-
-
-    {% endif %}
-
+<div class="qf-supplier">
+
+<style>
+	.qf-supplier {
+		--qf-ink: #1c2b3a;
+		--qf-muted: #64748b;
+		--qf-bg: #f5f6f8;
+		--qf-surface: #ffffff;
+		--qf-border: #dde1e7;
+		--qf-accent: #d97706;
+		--qf-accent-dark: #b45309;
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+		color: var(--qf-ink);
+		background: var(--qf-bg);
+		padding: 24px;
+		border-radius: 12px;
+		max-width: 900px;
+		margin: 0 auto;
+	}
+	.qf-supplier h1 { font-size: 24px; font-weight: 700; margin: 0 0 2px 0; letter-spacing: -0.02em; }
+	.qf-supplier h2 { font-size: 17px; font-weight: 700; margin: 0 0 8px 0; }
+	.qf-supplier h3 { font-size: 14px; font-weight: 700; margin: 0 0 10px 0; color: var(--qf-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+	.qf-eyebrow { font-size: 13px; color: var(--qf-muted); font-weight: 600; }
+	.qf-header {
+		display: flex; align-items: center; justify-content: space-between;
+		background: var(--qf-surface); border: 1px solid var(--qf-border);
+		border-radius: 10px; padding: 18px 22px; margin-bottom: 8px;
+	}
+	.qf-header a { color: var(--qf-accent-dark); font-weight: 600; text-decoration: none; font-size: 13px; }
+	.qf-header a:hover { text-decoration: underline; }
+	.qf-intro { font-size: 14px; color: #334155; margin: 14px 0 20px 0; line-height: 1.5; }
+	.qf-btn {
+		font-size: 13px; font-weight: 600; padding: 9px 16px; border-radius: 7px;
+		border: 1px solid var(--qf-border); background: var(--qf-surface); color: var(--qf-ink);
+		cursor: pointer; transition: all 0.12s ease;
+	}
+	.qf-btn:hover { border-color: #c7ccd4; background: #fafbfc; }
+	.qf-btn-primary { background: var(--qf-accent); border-color: var(--qf-accent); color: #fff; }
+	.qf-btn-primary:hover { background: var(--qf-accent-dark); border-color: var(--qf-accent-dark); }
+	.qf-rfq-card {
+		background: var(--qf-surface); border: 1px solid var(--qf-border); border-left: 4px solid var(--qf-accent);
+		border-radius: 10px; padding: 20px 22px; margin-bottom: 18px;
+	}
+	.qf-rfq-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+	.qf-pill {
+		display: inline-block; font-size: 11.5px; font-weight: 700; text-transform: uppercase;
+		letter-spacing: 0.03em; padding: 4px 10px; border-radius: 999px; background: #ecfdf5; color: #0f766e;
+	}
+	.qf-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px 24px; margin: 14px 0; }
+	.qf-meta-label { font-size: 11.5px; color: var(--qf-muted); text-transform: uppercase; letter-spacing: 0.03em; font-weight: 700; margin-bottom: 2px; }
+	.qf-meta-value { font-size: 14px; }
+	.qf-summary { font-size: 14px; color: #334155; line-height: 1.5; margin: 4px 0 6px 0; }
+	.qf-table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 8px; }
+	.qf-table th {
+		text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em;
+		color: var(--qf-muted); font-weight: 700; padding: 8px 10px; border-bottom: 2px solid var(--qf-border);
+	}
+	.qf-table td { padding: 9px 10px; border-bottom: 1px solid var(--qf-border); vertical-align: middle; }
+	.qf-empty { text-align: center; color: var(--qf-muted); padding: 28px; border: 1px dashed var(--qf-border); border-radius: 10px; font-size: 14px; }
+	.qf-cta-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 16px 18px; margin-top: 14px; }
+	.qf-cta-box p { margin: 0 0 12px 0; font-size: 14px; }
+	.qf-bid-form-section {
+		display: none; background: var(--qf-surface); border: 1px solid var(--qf-border);
+		border-radius: 10px; padding: 24px; margin-top: 8px;
+	}
+	.qf-field { margin-bottom: 16px; }
+	.qf-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+	.qf-input, .qf-textarea {
+		width: 100%; box-sizing: border-box; font-size: 14px; padding: 9px 11px;
+		border: 1px solid var(--qf-border); border-radius: 7px; background: #fff; color: var(--qf-ink);
+		font-family: inherit;
+	}
+	.qf-input:focus, .qf-textarea:focus { outline: 2px solid var(--qf-accent); outline-offset: 1px; border-color: var(--qf-accent); }
+	.qf-form-actions { display: flex; gap: 10px; margin-top: 4px; }
+</style>
+
+<!-- HEADER -->
+<div class="qf-header">
+	<div>
+		<h1>QuoteForge</h1>
+		<span class="qf-eyebrow">Supplier Quotation Portal</span>
+	</div>
+	<div>
+		{% if frappe.session.user == "Guest" %}
+			<a href="/login?redirect=/open_rfqs">Staff Login</a>
+		{% else %}
+			<span class="qf-eyebrow">User: <strong>{{ frappe.session.user }}</strong></span>
+			&nbsp;·&nbsp;
+			<a href="/logout">Logout</a>
+		{% endif %}
+	</div>
+</div>
+
+<!-- PAGE INTRODUCTION -->
+<h2 style="margin-top:20px;">Open Request for Quotations</h2>
+<p class="qf-intro">Review active procurement requests and submit your quotation before the specified closing date.</p>
+
+<!-- RFQ LISTINGS -->
+{% if not rfqs %}
+
+	<div class="qf-empty">
+		<h3 style="margin-top:0;">No Active RFQs</h3>
+		<p style="margin:0;">There are currently no active RFQs accepting bids.</p>
+	</div>
+
+{% else %}
+
+	{% for rfq in rfqs %}
+
+		<div class="qf-rfq-card">
+
+			<!-- RFQ TITLE + STATUS -->
+			<div class="qf-rfq-head">
+				<h2>{{ rfq.title or rfq.name }}</h2>
+				<span class="qf-pill">OPEN</span>
+			</div>
+
+			<!-- RFQ ID / CLOSING DATE -->
+			<div class="qf-meta-grid">
+				<div>
+					<div class="qf-meta-label">RFQ ID</div>
+					<div class="qf-meta-value">{{ rfq.name }}</div>
+				</div>
+				<div>
+					<div class="qf-meta-label">Closing Date</div>
+					<div class="qf-meta-value">{{ rfq.closing__datetime or "N/A" }}</div>
+				</div>
+			</div>
+
+			<!-- SUMMARY -->
+			<div class="qf-meta-label">Summary</div>
+			<p class="qf-summary">{{ rfq.summary or "No summary provided." }}</p>
+
+			<!-- REQUESTED ITEMS -->
+			<h3 style="margin-top:16px;">Requested Items</h3>
+
+			{% if rfq.rfq_items %}
+
+				<table class="qf-table">
+					<thead>
+						<tr>
+							<th>Item Name</th>
+							<th>Quantity</th>
+							<th>Description</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for item in rfq.rfq_items %}
+							<tr>
+								<td>{{ item.item_name }}</td>
+								<td>{{ item.qty }}</td>
+								<td>{{ item.description or "-" }}</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+
+			{% else %}
+
+				<p class="qf-eyebrow">No specific item list attached.</p>
+
+			{% endif %}
+
+			<!-- SUBMIT QUOTATION ACTION -->
+			<div class="qf-cta-box">
+				<h3 style="margin-top:0;">Submit Your Quotation</h3>
+				<p>If you are interested in supplying the requested items, submit your quotation using the form below.</p>
+				<button
+					type="button"
+					class="qf-btn qf-btn-primary"
+					onclick="openBidForm(
+						'{{ rfq.name }}',
+						'{{ rfq.title or rfq.name }}'
+					)"
+				>
+					Submit Quotation
+				</button>
+			</div>
+
+		</div>
+
+	{% endfor %}
+
+{% endif %}
+
+<div id="bidFormSection" class="qf-bid-form-section">
+
+	<h2 id="formTitle">Submit Quotation</h2>
+	<p class="qf-intro" style="margin-top:0;">Provide the required details to submit your quotation.</p>
+
+	<form id="supplierBidForm">
+
+		<!-- RFQ NAME -->
+		<input type="hidden" id="rfq_name">
+
+		<!-- SUPPLIER NAME -->
+		<div class="qf-field">
+			<label class="qf-label" for="supplier_name">Supplier / Company Name *</label>
+			<input type="text" id="supplier_name" class="qf-input" required>
+		</div>
+
+		<!-- EMAIL -->
+		<div class="qf-field">
+			<label class="qf-label" for="email">Contact Email *</label>
+			<input type="email" id="email" class="qf-input" required>
+		</div>
+
+		<!-- PRICE -->
+		<div class="qf-field">
+			<label class="qf-label" for="price">Total Quoted Price ($) *</label>
+			<input type="number" step="0.01" id="price" class="qf-input" required>
+		</div>
+
+		<!-- DELIVERY DAYS -->
+		<div class="qf-field">
+			<label class="qf-label" for="delivery_days">Delivery Lead Time (Days) *</label>
+			<input type="number" id="delivery_days" class="qf-input" required>
+		</div>
+
+		<!-- REMARKS -->
+		<div class="qf-field">
+			<label class="qf-label" for="remarks">Remarks / Terms</label>
+			<textarea id="remarks" class="qf-textarea" rows="4"></textarea>
+		</div>
+
+		<!-- FORM ACTIONS -->
+		<div class="qf-form-actions">
+			<button type="submit" id="submitBidBtn" class="qf-btn qf-btn-primary">Send Quotation</button>
+			<button type="button" class="qf-btn" onclick="closeBidForm()">Cancel</button>
+		</div>
+
+	</form>
 
 </div>
 
-
-<br>
-
-
-<!-- =====================================================
-     SUBMIT BID FORM
-====================================================== -->
-
-<div
-    id="bidFormSection"
-    style="
-        display: none;
-        border: 2px solid black;
-        padding: 20px;
-    "
->
-
-
-    <h2 id="formTitle">
-        Submit Quotation
-    </h2>
-
-
-    <p>
-        Provide the required details to submit your quotation.
-    </p>
-
-
-    <hr>
-
-
-    <form id="supplierBidForm">
-
-
-        <!-- RFQ NAME -->
-
-        <input
-            type="hidden"
-            id="rfq_name"
-        >
-
-
-        <!-- SUPPLIER NAME -->
-
-        <p>
-
-            <label for="supplier_name">
-
-                <strong>
-                    Supplier / Company Name *
-                </strong>
-
-            </label>
-
-            <br>
-
-            <input
-                type="text"
-                id="supplier_name"
-                required
-            >
-
-        </p>
-
-
-        <!-- EMAIL -->
-
-        <p>
-
-            <label for="email">
-
-                <strong>
-                    Contact Email *
-                </strong>
-
-            </label>
-
-            <br>
-
-            <input
-                type="email"
-                id="email"
-                required
-            >
-
-        </p>
-
-
-        <!-- PRICE -->
-
-        <p>
-
-            <label for="price">
-
-                <strong>
-                    Total Quoted Price ($) *
-                </strong>
-
-            </label>
-
-            <br>
-
-            <input
-                type="number"
-                step="0.01"
-                id="price"
-                required
-            >
-
-        </p>
-
-
-        <!-- DELIVERY DAYS -->
-
-        <p>
-
-            <label for="delivery_days">
-
-                <strong>
-                    Delivery Lead Time (Days) *
-                </strong>
-
-            </label>
-
-            <br>
-
-            <input
-                type="number"
-                id="delivery_days"
-                required
-            >
-
-        </p>
-
-
-        <!-- REMARKS -->
-
-        <p>
-
-            <label for="remarks">
-
-                <strong>
-                    Remarks / Terms
-                </strong>
-
-            </label>
-
-            <br>
-
-            <textarea
-                id="remarks"
-                rows="4"
-            ></textarea>
-
-        </p>
-
-
-        <hr>
-
-
-        <!-- FORM ACTIONS -->
-
-        <p>
-
-            <button
-                type="submit"
-                id="submitBidBtn"
-            >
-
-                Send Quotation
-
-            </button>
-
-
-            <button
-                type="button"
-                onclick="closeBidForm()"
-            >
-
-                Cancel
-
-            </button>
-
-        </p>
-
-
-    </form>
-
-
 </div>
-
-
-<!-- =====================================================
-     JAVASCRIPT LOGIC
-====================================================== -->
 
 <script>
 
-
-/* =====================================================
-   OPEN BID FORM
-====================================================== */
-
 function openBidForm(rfqName, rfqTitle) {
 
+	document.getElementById('rfq_name').value = rfqName;
 
-    document.getElementById(
-        'rfq_name'
-    ).value = rfqName;
+	document.getElementById('formTitle').innerText =
+		"Submit Quotation for " + rfqTitle;
 
+	document.getElementById('bidFormSection').style.display = 'block';
 
-    document.getElementById(
-        'formTitle'
-    ).innerText =
-        "Submit Quotation for " + rfqTitle;
-
-
-    document.getElementById(
-        'bidFormSection'
-    ).style.display = 'block';
-
-
-    window.scrollTo(
-        0,
-        document.body.scrollHeight
-    );
+	window.scrollTo(0, document.body.scrollHeight);
 
 }
-
-
-/* =====================================================
-   CLOSE BID FORM
-====================================================== */
 
 function closeBidForm() {
 
-
-    document.getElementById(
-        'bidFormSection'
-    ).style.display = 'none';
+	document.getElementById('bidFormSection').style.display = 'none';
 
 }
 
 
-/* =====================================================
-   SUPPLIER BID SUBMISSION
-====================================================== */
-
 document
-    .getElementById('supplierBidForm')
-    .addEventListener(
-        'submit',
-        function(e) {
+	.getElementById('supplierBidForm')
+	.addEventListener(
+		'submit',
+		function(e) {
 
+			e.preventDefault();
 
-            e.preventDefault();
+			var btn = document.getElementById('submitBidBtn');
 
+			btn.disabled = true;
 
-            var btn =
-                document.getElementById(
-                    'submitBidBtn'
-                );
+			btn.innerText = "Submitting...";
 
+			frappe.call({
 
-            btn.disabled = true;
+				method: "quoteforge.api.submit_supplier_bid",
 
+				args: {
 
-            btn.innerText =
-                "Submitting...";
+					rfq: document.getElementById('rfq_name').value,
 
+					supplier_name: document.getElementById('supplier_name').value,
 
-            frappe.call({
+					email: document.getElementById('email').value,
 
-                method:
-                    "quoteforge.api.submit_supplier_bid",
+					price: document.getElementById('price').value,
 
+					delivery_days: document.getElementById('delivery_days').value,
 
-                args: {
+					remarks: document.getElementById('remarks').value
 
+				},
 
-                    rfq:
-                        document.getElementById(
-                            'rfq_name'
-                        ).value,
+				callback: function(r) {
 
+					if (!r.exc) {
 
-                    supplier_name:
-                        document.getElementById(
-                            'supplier_name'
-                        ).value,
+						alert("Your quotation has been submitted successfully!");
 
+						closeBidForm();
 
-                    email:
-                        document.getElementById(
-                            'email'
-                        ).value,
+						document.getElementById('supplierBidForm').reset();
 
+					}
 
-                    price:
-                        document.getElementById(
-                            'price'
-                        ).value,
+					btn.disabled = false;
 
+					btn.innerText = "Send Quotation";
 
-                    delivery_days:
-                        document.getElementById(
-                            'delivery_days'
-                        ).value,
+				}
 
+			});
 
-                    remarks:
-                        document.getElementById(
-                            'remarks'
-                        ).value
+		}
 
-                },
-
-
-                callback:
-                    function(r) {
-
-
-                        if (!r.exc) {
-
-
-                            alert(
-                                "Your quotation has been submitted successfully!"
-                            );
-
-
-                            closeBidForm();
-
-
-                            document
-                                .getElementById(
-                                    'supplierBidForm'
-                                )
-                                .reset();
-
-
-                        }
-
-
-                        btn.disabled =
-                            false;
-
-
-                        btn.innerText =
-                            "Send Quotation";
-
-
-                    }
-
-            });
-
-
-        }
-
-    );
-
+	);
 
 </script>
-
 
 {% endblock %}
