@@ -169,6 +169,7 @@ frappe.pages['procure_admin'].on_page_load = function(wrapper) {
 
 	load_rfqs(wrapper);
 	setup_rfq_form(wrapper);
+	setup_report_buttons(wrapper); 
 };
 
 function setup_rfq_form(wrapper) {
@@ -227,6 +228,16 @@ function setup_rfq_form(wrapper) {
 }
 
 function setup_report_buttons(wrapper) {
+
+	console.log("setup_report_buttons called");
+
+    $(wrapper).find("#rfqStatusReport").on("click", function() {
+        console.log("RFQ Status clicked");
+        frappe.set_route("query-report", "RFQ Status Report");
+    });
+
+
+
 
 	$(wrapper).find("#rfqStatusReport").on("click", function() {
 
