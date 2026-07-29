@@ -1,5 +1,6 @@
 import frappe
 import json
+from frappe.auth import LoginManager
 
 @frappe.whitelist(allow_guest=True)
 def submit_supplier_bid(rfq, supplier_name, email, price, delivery_days, remarks=None):
@@ -21,7 +22,6 @@ def submit_supplier_bid(rfq, supplier_name, email, price, delivery_days, remarks
     })
 
     bid.insert(ignore_permissions=True)
-    frappe.db.commit()
 
     return {
         "status": "success",
@@ -215,7 +215,6 @@ def award_supplier(rfq, supplier_bid):
 
     if rfq_doc.status != "Closed":
         frappe.throw("Supplier can only be awarded after the RFQ is closed.")
-
     bid = frappe.get_doc("Supplier Bid", supplier_bid)
 
     if bid.rfq != rfq:
@@ -236,4 +235,173 @@ def award_supplier(rfq, supplier_bid):
     return {
         "status": "success",
         "message": "Supplier awarded successfully."
+    }
+
+
+
+   # Supplier Register Function Call frm supplier_register
+@frappe.whitelist(allow_guest=True)
+def register_supplier(
+    company_name,
+    contact_person,
+    email,
+    phone,
+    address,
+    gst_number,
+    business_profile
+):
+
+    if frappe.db.exists("Supplier Profile", {"email": email}):
+        frappe.throw("Email already registered.")
+
+    if gst_number:
+        if frappe.db.exists("Supplier Profile", {"gst_number": gst_number}):
+            frappe.throw("GST Number already registered.")
+
+    supplier = frappe.get_doc({
+        "doctype": "Supplier Profile",
+        "company_name": company_name,
+        "contact_person": contact_person,
+        "email": email,
+        "phone": phone,
+        "address": address,
+        "gst_number": gst_number,
+        "business_profile": business_profile,
+        "status": "Pending"
+    })
+
+    supplier.insert(ignore_permissions=True)
+
+    frappe.db.commit()
+
+    return {
+        "status": "success",
+        "message": "Registration submitted successfully."
+    }
+
+
+# geting procuremnt admin pending supplier approvals
+    
+@frappe.whitelist()
+def get_pending_suppliers():
+
+    roles = frappe.get_roles(frappe.session.user)
+
+    if "Procurement Admin" not in roles and "System Manager" not in roles:
+        frappe.throw("Permission Denied")
+
+    suppliers = frappe.get_all(
+        "Supplier Profile",
+        filters={
+            "status": "Pending"
+        },
+        fields=[
+            "name",
+            "company_name",
+            "contact_person",
+            "gst_number",
+            "email",
+            "phone",
+            "address"
+        ],
+        ignore_permissions=True
+    )
+
+    return {
+        "suppliers": suppliers
+    }    
+
+@frappe.whitelist()
+def approve_supplier(supplier):
+
+    roles = frappe.get_roles(frappe.session.user)
+
+    if "Procurement Admin" not in roles and "System Manager" not in roles:
+        frappe.throw("Permission Denied")
+
+    supplier_doc = frappe.get_doc("Supplier Profile", supplier)
+
+    email_name = supplier_doc.email.split("@")[0]
+    temporary_password = email_name + "@123"
+    
+    if supplier_doc.status == "Approved":
+        frappe.throw("Supplier already approved.")
+
+    if frappe.db.exists("User", supplier_doc.email):
+        user = frappe.get_doc("User", supplier_doc.email)
+    else:
+        user = frappe.get_doc({
+            "doctype": "User",
+            "email": supplier_doc.email,
+            "first_name": supplier_doc.contact_person,
+            "enabled": 1,
+            "send_welcome_email": 0
+        })
+
+        user.new_password = temporary_password
+
+        user.insert(ignore_permissions=True)
+        user.add_roles("Supplier")
+
+    supplier_doc.user = user.name
+    supplier_doc.status = "Approved"
+
+    supplier_doc.save(ignore_permissions=True)
+
+    frappe.db.commit()
+
+    return {
+        "status": "success",
+        "message": "Supplier approved successfully.",
+        "password":  temporary_password
+    }
+
+@frappe.whitelist()
+def reject_supplier(supplier):
+
+    roles = frappe.get_roles(frappe.session.user)
+
+    if "Procurement Admin" not in roles and "System Manager" not in roles:
+        frappe.throw("Permission Denied")
+
+    supplier_doc = frappe.get_doc("Supplier Profile", supplier)
+
+    supplier_doc.status = "Rejected"
+
+    supplier_doc.save(ignore_permissions=True)
+
+    frappe.db.commit()
+
+    return {
+        "status": "success",
+        "message": "Supplier rejected successfully."
+    }
+
+@frappe.whitelist(allow_guest=True)
+def login_supplier(email, password):
+
+    supplier = frappe.db.get_value(
+        "Supplier Profile",
+        {"email": email},
+        ["name", "status"],
+        as_dict=True
+    )
+
+    if not supplier:
+        frappe.throw("Supplier is not registered.")
+
+    if supplier.status == "Pending":
+        frappe.throw("Your registration is pending approval.")
+
+    if supplier.status == "Rejected":
+        frappe.throw("Your registration has been rejected.")
+
+    login_manager = LoginManager()
+
+    login_manager.authenticate(email, password)
+
+    login_manager.post_login()
+
+    return {
+        "status": "success"
     }

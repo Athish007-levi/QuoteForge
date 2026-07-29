@@ -115,6 +115,20 @@ frappe.pages['procure_admin'].on_page_load = function(wrapper) {
 			</div>
 
 			<div class="qf-card">
+
+                <h2>Pending Supplier Registrations</h2>
+
+                <div id="pendingSuppliers">
+
+                <div class="qf-empty">
+            Loading suppliers...
+            </div>
+
+      </div>
+
+    </div>
+
+			<div class="qf-card">
 				<h2>Create New RFQ</h2>
 				<form id="createRFQForm">
 					<div class="qf-field">
@@ -170,6 +184,7 @@ frappe.pages['procure_admin'].on_page_load = function(wrapper) {
 	load_rfqs(wrapper);
 	setup_rfq_form(wrapper);
 	setup_report_buttons(wrapper); 
+	load_pending_suppliers(wrapper);
 };
 
 function setup_rfq_form(wrapper) {
@@ -437,3 +452,157 @@ function close_rfq(rfqName) {
 		}
 	});
 }
+
+function load_pending_suppliers(wrapper){
+
+    frappe.call({
+
+        method: "quoteforge.api.get_pending_suppliers",
+
+        callback: function(r){
+
+            var suppliers = r.message.suppliers;
+
+            var html = "";
+
+            if(suppliers.length == 0){
+
+                html = "<div class='qf-empty'>No pending supplier registrations.</div>";
+
+            }
+            else{
+
+                suppliers.forEach(function(supplier){
+
+                    html += `
+                        <div class="qf-rfq-card">
+
+                            <h3>${supplier.company_name}</h3>
+
+                            <p><strong>Contact:</strong> ${supplier.contact_person}</p>
+
+                            <p><strong>Email:</strong> ${supplier.email}</p>
+
+                            <p><strong>Phone:</strong> ${supplier.phone}</p>
+
+                            <p><strong>Address:</strong> ${supplier.address}</p>
+
+                            <p><strong>GST:</strong> ${supplier.gst_number}</p>
+
+                            <button
+                                class="qf-btn qf-btn-primary approve-supplier"
+                                data-name="${supplier.name}">
+                                Approve
+                            </button>
+
+                            <button
+                                class="qf-btn qf-btn-danger reject-supplier"
+                                data-name="${supplier.name}">
+                                Reject
+                            </button>
+
+                        </div>
+                    `;
+
+                });
+
+            }
+
+            $(wrapper).find("#pendingSuppliers").html(html);
+
+            $(wrapper).find(".approve-supplier").off("click").on("click", function(){
+
+                var supplier = $(this).data("name");
+
+                approve_supplier(supplier, wrapper);
+
+            });
+
+            $(wrapper).find(".reject-supplier").off("click").on("click", function(){
+
+                var supplier = $(this).data("name");
+
+                reject_supplier(supplier, wrapper);
+
+            });
+
+        }
+
+    });
+
+}
+
+
+function approve_supplier(name, wrapper){
+
+    console.log("Button Clicked");
+    console.log(name);
+
+    frappe.call({
+
+        method: "quoteforge.api.approve_supplier",
+
+        args: {
+            supplier: name
+        },
+
+        callback: function(r){
+
+            console.log(r);
+
+            if(!r.exc){
+
+                frappe.msgprint({
+
+                    title: "Supplier Approved",
+
+                    message:
+                        r.message.message +
+                        "<br><br><b>Temporary Password:</b> " +
+                        r.message.password,
+
+                    indicator: "green"
+
+                });
+
+                load_pending_suppliers(wrapper);
+
+            }
+
+        }
+
+    });
+
+}
+
+
+
+
+
+
+function reject_supplier(name){
+
+    frappe.call({
+
+        method: "quoteforge.api.reject_supplier",
+
+        args:{
+            supplier:name
+        },
+
+        callback:function(r){
+
+            if(!r.exc){
+
+                frappe.msgprint(r.message.message);
+
+                load_pending_suppliers(cur_page.page);
+
+            }
+
+        }
+
+    });
+
+}
+

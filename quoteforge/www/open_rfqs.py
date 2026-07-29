@@ -3,7 +3,7 @@ import frappe
 def get_context(context):
     context.title = "Open Quotation Requests"
     
-    # Updated to match your exact column names: 'closing__datetime' and 'summary'
+    
     rfqs = frappe.get_all(
         "RFQ",
         filters={"status": "Open"},

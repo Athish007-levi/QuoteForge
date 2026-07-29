@@ -1,0 +1,85 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %} 
+
+<div class="qf-card">
+
+    <h2>Supplier Login</h2>
+
+    <form id="supplierLoginForm">
+
+        <div class="qf-field">
+            <label>Email</label>
+            <input type="email" id="email" class="qf-input" required>
+        </div>
+
+
+        <div class="qf-field">
+            <label>Password</label>
+            <input type="password" id="password" class="qf-input" required>
+        </div>
+
+
+        <button type="submit" class="qf-btn qf-btn-primary">
+            Login
+        </button>
+
+    </form>
+
+
+    <div style="margin-top:20px;">
+
+        <a href="/update-password">
+            Forgot Password?
+        </a>
+
+    </div>
+
+
+    <div style="margin-top:20px;">
+
+        <p>
+            New Supplier?
+            <a href="/supplier_register">
+                Register Here
+            </a>
+        </p>
+
+    </div>
+
+</div>
+
+<script>
+
+document.getElementById("supplierLoginForm").addEventListener("submit", function(e){
+
+    e.preventDefault();
+
+    frappe.call({
+
+        method: "quoteforge.api.login_supplier",
+
+        args: {
+
+            email: document.getElementById("email").value,
+
+            password: document.getElementById("password").value
+
+        },
+
+        callback: function(r){
+
+            if(!r.exc){
+
+                window.location.href = "/open_rfqs";
+
+            }
+
+        }
+
+    });
+
+});
+
+</script>
+{% endblock %}
