@@ -2,20 +2,34 @@ import frappe
 import json
 from frappe.auth import LoginManager
 
-@frappe.whitelist(allow_guest=True)
-def submit_supplier_bid(rfq, supplier_name, email, price, delivery_days, remarks=None):
-    # Verify open
+@frappe.whitelist()
+def submit_supplier_bid(rfq, price, delivery_days, remarks=None):
+
     rfq_status = frappe.db.get_value("RFQ", rfq, "status")
 
     if rfq_status != "Open":
         frappe.throw("This RFQ is no longer open for bidding.")
 
-    # Supplier bid
+    supplier = frappe.get_value(
+        "Supplier Profile",
+        {
+            "user": frappe.session.user
+        },
+        [
+            "company_name",
+            "email"
+        ],
+        as_dict=True
+    )
+
+    if not supplier:
+        frappe.throw("Supplier Profile not found.")
+
     bid = frappe.get_doc({
         "doctype": "Supplier Bid",
         "rfq": rfq,
-        "supplier_name": supplier_name,
-        "contact_email": email,
+        "supplier_name": supplier["company_name"],
+        "contact_email": supplier["email"],
         "total_quoted_price": price,
         "delivery_days": delivery_days,
         "remarks": remarks
@@ -27,7 +41,6 @@ def submit_supplier_bid(rfq, supplier_name, email, price, delivery_days, remarks
         "status": "success",
         "message": "Quotation submitted successfully!"
     }
-
 @frappe.whitelist()
 def create_new_rfq(title, summary, closing_date, items):
     user_roles = frappe.get_roles(frappe.session.user)
@@ -405,3 +418,28 @@ def login_supplier(email, password):
     return {
         "status": "success"
     }
+
+
+@frappe.whitelist()
+def get_logged_in_supplier():
+
+    supplier = frappe.get_value(
+        "Supplier Profile",
+        {
+            "user": frappe.session.user
+        },
+        [
+            "company_name",
+            "contact_person",
+            "email",
+            "phone",
+            "address",
+            "gst_number"
+        ],
+        as_dict=True
+    )
+
+    if not supplier:
+        frappe.throw("Supplier Profile not found.")
+
+    return supplier

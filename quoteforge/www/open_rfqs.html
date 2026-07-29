@@ -197,17 +197,23 @@
 		<!-- RFQ NAME -->
 		<input type="hidden" id="rfq_name">
 
-		<!-- SUPPLIER NAME -->
 		<div class="qf-field">
-			<label class="qf-label" for="supplier_name">Supplier / Company Name *</label>
-			<input type="text" id="supplier_name" class="qf-input" required>
-		</div>
+    <label class="qf-label">Supplier</label>
+    <input
+        type="text"
+        id="company_name"
+        class="qf-input"
+        readonly>
+</div>
 
-		<!-- EMAIL -->
-		<div class="qf-field">
-			<label class="qf-label" for="email">Contact Email *</label>
-			<input type="email" id="email" class="qf-input" required>
-		</div>
+<div class="qf-field">
+    <label class="qf-label">Email</label>
+    <input
+        type="email"
+        id="supplier_email"
+        class="qf-input"
+        readonly>
+</div>
 
 		<!-- PRICE -->
 		<div class="qf-field">
@@ -243,14 +249,34 @@
 
 function openBidForm(rfqName, rfqTitle) {
 
-	document.getElementById('rfq_name').value = rfqName;
+    document.getElementById("rfq_name").value = rfqName;
 
-	document.getElementById('formTitle').innerText =
-		"Submit Quotation for " + rfqTitle;
+    document.getElementById("formTitle").innerText =
+        "Submit Quotation for " + rfqTitle;
 
-	document.getElementById('bidFormSection').style.display = 'block';
+    frappe.call({
 
-	window.scrollTo(0, document.body.scrollHeight);
+        method: "quoteforge.api.get_logged_in_supplier",
+
+        callback: function(r){
+
+            if(!r.exc){
+
+                document.getElementById("company_name").value =
+                    r.message.company_name;
+
+                document.getElementById("supplier_email").value =
+                    r.message.email;
+
+            }
+
+        }
+
+    });
+
+    document.getElementById("bidFormSection").style.display = "block";
+
+    window.scrollTo(0, document.body.scrollHeight);
 
 }
 
@@ -282,10 +308,6 @@ document
 				args: {
 
 					rfq: document.getElementById('rfq_name').value,
-
-					supplier_name: document.getElementById('supplier_name').value,
-
-					email: document.getElementById('email').value,
 
 					price: document.getElementById('price').value,
 

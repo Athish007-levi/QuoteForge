@@ -59,7 +59,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-22 14:57:02.814038",
+ "modified": "2026-07-29 18:36:10.625497",
  "modified_by": "Administrator",
  "module": "Quoteforge",
  "name": "Supplier Bid",
@@ -109,6 +109,16 @@
    "role": "Guest",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Supplier",
+   "share": 1
   }
  ],
  "row_format": "Dynamic",
