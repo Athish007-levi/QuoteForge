@@ -12,7 +12,8 @@
   "contact_email",
   "delivery_days",
   "total_quoted_price",
-  "remarks"
+  "remarks",
+  "supplier"
  ],
  "fields": [
   {
@@ -54,12 +55,18 @@
    "fieldname": "remarks",
    "fieldtype": "Small Text",
    "label": "Remarks"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier Profile"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-29 18:36:10.625497",
+ "modified": "2026-07-30 16:14:34.635167",
  "modified_by": "Administrator",
  "module": "Quoteforge",
  "name": "Supplier Bid",

@@ -16,6 +16,7 @@ def submit_supplier_bid(rfq, price, delivery_days, remarks=None):
             "user": frappe.session.user
         },
         [
+            "name"
             "company_name",
             "email"
         ],
@@ -40,7 +41,8 @@ def submit_supplier_bid(rfq, price, delivery_days, remarks=None):
     return {
         "status": "success",
         "message": "Quotation submitted successfully!"
-    }
+    } 
+
 @frappe.whitelist()
 def create_new_rfq(title, summary, closing_date, items):
     user_roles = frappe.get_roles(frappe.session.user)
@@ -252,7 +254,6 @@ def award_supplier(rfq, supplier_bid):
 
 
 
-   # Supplier Register Function Call frm supplier_register
 @frappe.whitelist(allow_guest=True)
 def register_supplier(
     company_name,
@@ -292,8 +293,6 @@ def register_supplier(
         "message": "Registration submitted successfully."
     }
 
-
-# geting procuremnt admin pending supplier approvals
     
 @frappe.whitelist()
 def get_pending_suppliers():
@@ -323,6 +322,7 @@ def get_pending_suppliers():
     return {
         "suppliers": suppliers
     }    
+
 
 @frappe.whitelist()
 def approve_supplier(supplier):

@@ -2,15 +2,12 @@ import frappe
 
 def get_context(context):
 
-    # Redirect guests to supplier login
     if frappe.session.user == "Guest":
         frappe.local.flags.redirect_location = "/supplier_login"
         raise frappe.Redirect
 
-    # Get logged-in user's roles
     roles = frappe.get_roles(frappe.session.user)
 
-    # Allow only Supplier, Procurement Admin and System Manager
     if (
         "Supplier" not in roles
         and "Procurement Admin" not in roles
