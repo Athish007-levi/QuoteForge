@@ -257,3 +257,11 @@ app_license = "mit"
 # ignore_translatable_strings_from = []
 
 on_login = "quoteforge.api.redirect_after_login"
+
+scheduler_events = {
+    "cron": {
+        "* * * * *": [
+            "quoteforge.api.close_expired_rfqs"
+        ]
+    }
+}

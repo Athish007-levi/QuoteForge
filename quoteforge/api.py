@@ -16,7 +16,7 @@ def submit_supplier_bid(rfq, price, delivery_days, remarks=None):
             "user": frappe.session.user
         },
         [
-            "name"
+            "name",
             "company_name",
             "email"
         ],
@@ -443,3 +443,26 @@ def get_logged_in_supplier():
         frappe.throw("Supplier Profile not found.")
 
     return supplier
+
+
+from frappe.utils import now_datetime
+
+def close_expired_rfqs():
+
+    rfqs=frappe.get_all(
+        "RFQ",
+        filters={
+            "status":"Open",
+            "closing__datetime": ["<=", now_datetime()]
+        },
+        fields=["name"]
+        
+    )
+
+    for rfq in rfqs:
+        doc = frappe.get_doc("RFQ", rfq.name)
+        doc.status = "Closed"
+        doc.save(ignore_permissions=True)
+
+    frappe.db.commit()
+
