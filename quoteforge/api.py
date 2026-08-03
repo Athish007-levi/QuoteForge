@@ -44,28 +44,39 @@ def submit_supplier_bid(rfq, price, delivery_days, remarks=None):
     } 
 
 @frappe.whitelist()
-def create_new_rfq(title, summary, closing_date, items):
+def create_new_rfq(title, summary, closing_date, rfq_type, items=None, services=None):
     user_roles = frappe.get_roles(frappe.session.user)
 
     if "Procurement Admin" not in user_roles and "System Manager" not in user_roles:
         frappe.throw("Permission Denied: Only Procurement Admins can create RFQs.")
 
-    items = json.loads(items)
+    if rfq_type not in ("Product", "Service"):
+        frappe.throw("Invalid RFQ Type.")
 
     new_rfq = frappe.get_doc({
         "doctype": "RFQ",
         "title": title,
         "summary": summary,
         "closing__datetime": closing_date,
+        "rfq_type": rfq_type,
         "status": "Open"
     })
 
-    for item in items:
-        new_rfq.append("items_needed", {
-            "item_name": item.get("item_name"),
-            "qty": item.get("qty"),
-            "description": item.get("description")
-        })
+    if rfq_type == "Product":
+        items = json.loads(items) if items else []
+        for item in items:
+            new_rfq.append("items_needed", {
+                "item_name": item.get("item_name"),
+                "qty": item.get("qty"),
+                "description": item.get("description")
+            })
+    else:
+        services = json.loads(services) if services else []
+        for svc in services:
+            new_rfq.append("services_needed", {
+                "service_name": svc.get("service_name"),
+                "description": svc.get("description")
+            })
 
     new_rfq.insert(ignore_permissions=True)
     frappe.db.commit()
@@ -108,6 +119,7 @@ def get_procurement_data():
             "name",
             "status",
             "creation",
+            "rfq_type",
             "final_status",
             "awarded_supplier",
             "awarded_value",
@@ -133,14 +145,22 @@ def get_procurement_data():
             or getattr(doc, "closing_date", "N/A")
         )
 
-        rfq["rfq_items"] = []
-
-        for item in doc.items_needed:
-            rfq["rfq_items"].append({
+        rfq["rfq_items"] = [
+            {
                 "item_name": item.item_name,
                 "qty": item.qty,
                 "description": item.description
-            })
+            }
+            for item in doc.items_needed
+        ]
+
+        rfq["service_items"] = [
+            {
+                "service_name": svc.service_name,
+                "description": svc.description
+            }
+            for svc in doc.services_needed
+        ]
 
         rfq["bids"] = frappe.get_all(
             "Supplier Bid",
@@ -178,6 +198,7 @@ def get_buyer_evaluation_data():
             "status",
             "closing__datetime",
             "summary",
+            "rfq_type",
             "final_status",
             "awarded_supplier",
             "awarded_value",
@@ -187,6 +208,25 @@ def get_buyer_evaluation_data():
     )
 
     for rfq in rfqs:
+
+        doc = frappe.get_doc("RFQ", rfq["name"])
+
+        rfq["rfq_items"] = [
+            {
+                "item_name": item.item_name,
+                "qty": item.qty,
+                "description": item.description
+            }
+            for item in doc.items_needed
+        ]
+
+        rfq["service_items"] = [
+            {
+                "service_name": svc.service_name,
+                "description": svc.description
+            }
+            for svc in doc.services_needed
+        ]
 
         rfq["bids"] = frappe.get_all(
             "Supplier Bid",
@@ -465,4 +505,3 @@ def close_expired_rfqs():
         doc.save(ignore_permissions=True)
 
     frappe.db.commit()
-

@@ -20,15 +20,24 @@ def get_context(context):
     rfqs = frappe.get_all(
         "RFQ",
         filters={"status": "Open"},
-        fields=["name", "title", "closing__datetime", "summary"],
+        fields=["name", "title", "closing__datetime", "summary", "rfq_type"],
     )
 
     for rfq in rfqs:
-        rfq["rfq_items"] = frappe.get_all(
-            "RFQ Item",
-            filters={"parent": rfq["name"]},
-            fields=["item_name", "qty", "description"],
-        )
+        if rfq["rfq_type"] == "Product":
+            rfq["rfq_items"] = frappe.get_all(
+                "RFQ Item",
+                filters={"parent": rfq["name"]},
+                fields=["item_name", "qty", "description"],
+            )
+            rfq["service_items"] = []
+        else:
+            rfq["service_items"] = frappe.get_all(
+                "RFQ Service",
+                filters={"parent": rfq["name"]},
+                fields=["service_name", "description"],
+            )
+            rfq["rfq_items"] = []
 
     context.rfqs = rfqs
 

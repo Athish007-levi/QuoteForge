@@ -11,6 +11,9 @@
   "status",
   "closing__datetime",
   "summary",
+  "column_break_fzre",
+  "rfq_type",
+  "services_needed",
   "section_break_cnua",
   "items_needed",
   "section_break_cuon",
@@ -81,12 +84,28 @@
   {
    "fieldname": "section_break_cuon",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_fzre",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rfq_type",
+   "fieldtype": "Select",
+   "label": "RFQ Type",
+   "options": "Product\nService"
+  },
+  {
+   "fieldname": "services_needed",
+   "fieldtype": "Table",
+   "label": "Services needed",
+   "options": "RFQ Service"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-07-29 18:35:24.835207",
+ "modified": "2026-08-03 16:13:34.788711",
  "modified_by": "Administrator",
  "module": "Quoteforge",
  "name": "RFQ",

@@ -6,76 +6,62 @@
 
 <style>
 	.qf-supplier {
-		--qf-ink: #1c2b3a;
-		--qf-muted: #64748b;
-		--qf-bg: #f5f6f8;
+		--qf-ink: #222;
+		--qf-muted: #666;
+		--qf-bg: #ffffff;
 		--qf-surface: #ffffff;
-		--qf-border: #dde1e7;
-		--qf-accent: #d97706;
-		--qf-accent-dark: #b45309;
+		--qf-border: #ccc;
+		--qf-accent: #b45309;
 		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 		color: var(--qf-ink);
 		background: var(--qf-bg);
-		padding: 24px;
-		border-radius: 12px;
+		padding: 16px;
 		max-width: 900px;
 		margin: 0 auto;
 	}
-	.qf-supplier h1 { font-size: 24px; font-weight: 700; margin: 0 0 2px 0; letter-spacing: -0.02em; }
-	.qf-supplier h2 { font-size: 17px; font-weight: 700; margin: 0 0 8px 0; }
-	.qf-supplier h3 { font-size: 14px; font-weight: 700; margin: 0 0 10px 0; color: var(--qf-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-	.qf-eyebrow { font-size: 13px; color: var(--qf-muted); font-weight: 600; }
+	.qf-supplier h1 { font-size: 20px; font-weight: 700; margin: 0; }
+	.qf-supplier h2 { font-size: 16px; font-weight: 700; margin: 0 0 6px 0; }
+	.qf-supplier h3 { font-size: 13px; font-weight: 700; margin: 0 0 8px 0; color: var(--qf-muted); }
+	.qf-eyebrow { font-size: 13px; color: var(--qf-muted); }
 	.qf-header {
 		display: flex; align-items: center; justify-content: space-between;
-		background: var(--qf-surface); border: 1px solid var(--qf-border);
-		border-radius: 10px; padding: 18px 22px; margin-bottom: 8px;
+		border-bottom: 1px solid var(--qf-border); padding: 0 0 12px 0; margin-bottom: 8px;
 	}
-	.qf-header a { color: var(--qf-accent-dark); font-weight: 600; text-decoration: none; font-size: 13px; }
+	.qf-header a { color: var(--qf-accent); font-weight: 600; text-decoration: none; font-size: 13px; }
 	.qf-header a:hover { text-decoration: underline; }
-	.qf-intro { font-size: 14px; color: #334155; margin: 14px 0 20px 0; line-height: 1.5; }
+	.qf-intro { font-size: 14px; margin: 10px 0 16px 0; }
 	.qf-btn {
-		font-size: 13px; font-weight: 600; padding: 9px 16px; border-radius: 7px;
-		border: 1px solid var(--qf-border); background: var(--qf-surface); color: var(--qf-ink);
-		cursor: pointer; transition: all 0.12s ease;
+		font-size: 13px; padding: 7px 14px; border: 1px solid var(--qf-border);
+		background: #fff; color: var(--qf-ink); cursor: pointer;
 	}
-	.qf-btn:hover { border-color: #c7ccd4; background: #fafbfc; }
+	.qf-btn:hover { background: #f5f5f5; }
 	.qf-btn-primary { background: var(--qf-accent); border-color: var(--qf-accent); color: #fff; }
-	.qf-btn-primary:hover { background: var(--qf-accent-dark); border-color: var(--qf-accent-dark); }
-	.qf-rfq-card {
-		background: var(--qf-surface); border: 1px solid var(--qf-border); border-left: 4px solid var(--qf-accent);
-		border-radius: 10px; padding: 20px 22px; margin-bottom: 18px;
-	}
-	.qf-rfq-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-	.qf-pill {
-		display: inline-block; font-size: 11.5px; font-weight: 700; text-transform: uppercase;
-		letter-spacing: 0.03em; padding: 4px 10px; border-radius: 999px; background: #ecfdf5; color: #0f766e;
-	}
-	.qf-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px 24px; margin: 14px 0; }
-	.qf-meta-label { font-size: 11.5px; color: var(--qf-muted); text-transform: uppercase; letter-spacing: 0.03em; font-weight: 700; margin-bottom: 2px; }
+	.qf-rfq-card { border: 1px solid var(--qf-border); padding: 16px; margin-bottom: 14px; }
+	.qf-rfq-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+	.qf-pill { font-size: 12px; font-weight: 700; color: #2f7a4f; }
+	.qf-meta-grid { display: flex; gap: 24px; margin: 10px 0; flex-wrap: wrap; }
+	.qf-meta-label { font-size: 12px; color: var(--qf-muted); font-weight: 700; }
 	.qf-meta-value { font-size: 14px; }
-	.qf-summary { font-size: 14px; color: #334155; line-height: 1.5; margin: 4px 0 6px 0; }
-	.qf-table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 8px; }
+	.qf-summary { font-size: 14px; margin: 4px 0 6px 0; }
+	.qf-table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 6px; }
 	.qf-table th {
-		text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em;
-		color: var(--qf-muted); font-weight: 700; padding: 8px 10px; border-bottom: 2px solid var(--qf-border);
+		text-align: left; font-size: 12px; color: var(--qf-muted); font-weight: 700;
+		padding: 6px 8px; border-bottom: 1px solid var(--qf-border);
 	}
-	.qf-table td { padding: 9px 10px; border-bottom: 1px solid var(--qf-border); vertical-align: middle; }
-	.qf-empty { text-align: center; color: var(--qf-muted); padding: 28px; border: 1px dashed var(--qf-border); border-radius: 10px; font-size: 14px; }
-	.qf-cta-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 16px 18px; margin-top: 14px; }
-	.qf-cta-box p { margin: 0 0 12px 0; font-size: 14px; }
+	.qf-table td { padding: 7px 8px; border-bottom: 1px solid var(--qf-border); }
+	.qf-empty { text-align: center; color: var(--qf-muted); padding: 20px; border: 1px dashed var(--qf-border); font-size: 14px; }
+	.qf-cta-box { border: 1px solid var(--qf-border); padding: 12px 14px; margin-top: 10px; }
+	.qf-cta-box p { margin: 0 0 10px 0; font-size: 14px; }
 	.qf-bid-form-section {
-		display: none; background: var(--qf-surface); border: 1px solid var(--qf-border);
-		border-radius: 10px; padding: 24px; margin-top: 8px;
+		display: none; border: 1px solid var(--qf-border); padding: 16px; margin-top: 8px;
 	}
-	.qf-field { margin-bottom: 16px; }
-	.qf-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+	.qf-field { margin-bottom: 12px; }
+	.qf-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
 	.qf-input, .qf-textarea {
-		width: 100%; box-sizing: border-box; font-size: 14px; padding: 9px 11px;
-		border: 1px solid var(--qf-border); border-radius: 7px; background: #fff; color: var(--qf-ink);
-		font-family: inherit;
+		width: 100%; box-sizing: border-box; font-size: 14px; padding: 7px 9px;
+		border: 1px solid var(--qf-border); background: #fff; color: var(--qf-ink); font-family: inherit;
 	}
-	.qf-input:focus, .qf-textarea:focus { outline: 2px solid var(--qf-accent); outline-offset: 1px; border-color: var(--qf-accent); }
-	.qf-form-actions { display: flex; gap: 10px; margin-top: 4px; }
+	.qf-form-actions { display: flex; gap: 8px; margin-top: 4px; }
 </style>
 
 <!-- HEADER -->
@@ -135,33 +121,66 @@
 			<div class="qf-meta-label">Summary</div>
 			<p class="qf-summary">{{ rfq.summary or "No summary provided." }}</p>
 
-			<!-- REQUESTED ITEMS -->
-			<h3 style="margin-top:16px;">Requested Items</h3>
+			<!-- REQUESTED ITEMS / SERVICES -->
+			{% if rfq.rfq_type == "Product" %}
 
-			{% if rfq.rfq_items %}
+				<h3 style="margin-top:16px;">Requested Items</h3>
 
-				<table class="qf-table">
-					<thead>
-						<tr>
-							<th>Item Name</th>
-							<th>Quantity</th>
-							<th>Description</th>
-						</tr>
-					</thead>
-					<tbody>
-						{% for item in rfq.rfq_items %}
+				{% if rfq.rfq_items %}
+
+					<table class="qf-table">
+						<thead>
 							<tr>
-								<td>{{ item.item_name }}</td>
-								<td>{{ item.qty }}</td>
-								<td>{{ item.description or "-" }}</td>
+								<th>Item Name</th>
+								<th>Quantity</th>
+								<th>Description</th>
 							</tr>
-						{% endfor %}
-					</tbody>
-				</table>
+						</thead>
+						<tbody>
+							{% for item in rfq.rfq_items %}
+								<tr>
+									<td>{{ item.item_name }}</td>
+									<td>{{ item.qty }}</td>
+									<td>{{ item.description or "-" }}</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+
+				{% else %}
+
+					<p class="qf-eyebrow">No specific item list attached.</p>
+
+				{% endif %}
 
 			{% else %}
 
-				<p class="qf-eyebrow">No specific item list attached.</p>
+				<h3 style="margin-top:16px;">Services Required</h3>
+
+				{% if rfq.service_items %}
+
+					<table class="qf-table">
+						<thead>
+							<tr>
+								<th>Service Name</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for s in rfq.service_items %}
+								<tr>
+									<td>{{ s.service_name }}</td>
+									<td>{{ s.description or "-" }}</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+
+				{% else %}
+
+					<p class="qf-eyebrow">No specific service list attached.</p>
+
+				{% endif %}
 
 			{% endif %}
 

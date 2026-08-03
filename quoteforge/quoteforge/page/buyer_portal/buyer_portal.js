@@ -9,75 +9,55 @@ frappe.pages['buyer_portal'].on_page_load = function(wrapper) {
 		<div class="qf-buyer">
 			<style>
 				.qf-buyer {
-					--qf-ink: #1c2b3a;
-					--qf-muted: #64748b;
-					--qf-bg: #f5f6f8;
+					--qf-ink: #222;
+					--qf-muted: #666;
+					--qf-bg: #ffffff;
 					--qf-surface: #ffffff;
-					--qf-border: #dde1e7;
-					--qf-accent: #d97706;
-					--qf-accent-dark: #b45309;
-					--qf-open: #0f766e;
-					--qf-open-bg: #ecfdf5;
-					--qf-closed: #6b7280;
-					--qf-closed-bg: #f1f5f9;
+					--qf-border: #ccc;
+					--qf-accent: #b45309;
+					--qf-open: #2f7a4f;
+					--qf-closed: #666;
 					--qf-awarded: #1d4ed8;
-					--qf-awarded-bg: #eff6ff;
 					font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 					color: var(--qf-ink);
 					background: var(--qf-bg);
-					padding: 24px;
-					border-radius: 12px;
+					padding: 16px;
 				}
-				.qf-buyer h1 { font-size: 24px; font-weight: 700; margin: 0 0 2px 0; letter-spacing: -0.02em; }
-				.qf-buyer h2 { font-size: 17px; font-weight: 700; margin: 0 0 8px 0; }
-				.qf-buyer h3 { font-size: 14px; font-weight: 700; margin: 16px 0 10px 0; color: var(--qf-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-				.qf-eyebrow { font-size: 13px; color: var(--qf-muted); font-weight: 600; }
+				.qf-buyer h1 { font-size: 20px; font-weight: 700; margin: 0; }
+				.qf-buyer h2 { font-size: 16px; font-weight: 700; margin: 0 0 6px 0; }
+				.qf-buyer h3 { font-size: 13px; font-weight: 700; margin: 12px 0 8px 0; color: var(--qf-muted); }
+				.qf-eyebrow { font-size: 13px; color: var(--qf-muted); }
 				.qf-header {
 					display: flex; align-items: center; justify-content: space-between;
-					background: var(--qf-surface); border: 1px solid var(--qf-border);
-					border-radius: 10px; padding: 18px 22px; margin-bottom: 8px;
+					border-bottom: 1px solid var(--qf-border); padding: 0 0 12px 0; margin-bottom: 8px;
 				}
-				.qf-user-pill {
-					font-size: 13px; background: var(--qf-bg); border: 1px solid var(--qf-border);
-					padding: 6px 12px; border-radius: 999px; color: var(--qf-ink);
-				}
-				.qf-intro { font-size: 14px; color: #334155; margin: 14px 0 20px 0; line-height: 1.5; }
+				.qf-user-pill { font-size: 13px; color: var(--qf-muted); }
+				.qf-intro { font-size: 14px; margin: 10px 0 16px 0; }
 				.qf-btn {
-					font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 7px;
-					border: 1px solid var(--qf-border); background: var(--qf-surface); color: var(--qf-ink);
-					cursor: pointer; transition: all 0.12s ease;
+					font-size: 13px; padding: 6px 12px; border: 1px solid var(--qf-border);
+					background: #fff; color: var(--qf-ink); cursor: pointer;
 				}
-				.qf-btn:hover { border-color: #c7ccd4; background: #fafbfc; }
+				.qf-btn:hover { background: #f5f5f5; }
 				.qf-btn-primary { background: var(--qf-accent); border-color: var(--qf-accent); color: #fff; }
-				.qf-btn-primary:hover { background: var(--qf-accent-dark); border-color: var(--qf-accent-dark); }
 				.qf-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 				.qf-table th {
-					text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.04em;
-					color: var(--qf-muted); font-weight: 700; padding: 8px 10px; border-bottom: 2px solid var(--qf-border);
+					text-align: left; font-size: 12px; color: var(--qf-muted); font-weight: 700;
+					padding: 6px 8px; border-bottom: 1px solid var(--qf-border);
 				}
-				.qf-table td { padding: 9px 10px; border-bottom: 1px solid var(--qf-border); vertical-align: middle; }
-				.qf-rfq-card {
-					background: var(--qf-surface); border: 1px solid var(--qf-border); border-left: 4px solid var(--qf-accent);
-					border-radius: 10px; padding: 20px 22px; margin-bottom: 18px;
-				}
-				.qf-rfq-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-				.qf-pill {
-					display: inline-block; font-size: 11.5px; font-weight: 700; text-transform: uppercase;
-					letter-spacing: 0.03em; padding: 4px 10px; border-radius: 999px;
-				}
-				.qf-pill-open { background: var(--qf-open-bg); color: var(--qf-open); }
-				.qf-pill-closed { background: var(--qf-closed-bg); color: var(--qf-closed); }
-				.qf-pill-awarded { background: var(--qf-awarded-bg); color: var(--qf-awarded); }
-				.qf-meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px 24px; margin: 14px 0; }
-				.qf-meta-label { font-size: 11.5px; color: var(--qf-muted); text-transform: uppercase; letter-spacing: 0.03em; font-weight: 700; margin-bottom: 2px; }
+				.qf-table td { padding: 7px 8px; border-bottom: 1px solid var(--qf-border); }
+				.qf-rfq-card { border: 1px solid var(--qf-border); padding: 16px; margin-bottom: 14px; }
+				.qf-rfq-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+				.qf-pill { font-size: 12px; font-weight: 700; }
+				.qf-pill-open { color: var(--qf-open); }
+				.qf-pill-closed { color: var(--qf-closed); }
+				.qf-pill-awarded { color: var(--qf-awarded); }
+				.qf-meta-grid { display: flex; gap: 24px; margin: 10px 0; flex-wrap: wrap; }
+				.qf-meta-label { font-size: 12px; color: var(--qf-muted); font-weight: 700; }
 				.qf-meta-value { font-size: 14px; }
-				.qf-summary { font-size: 14px; color: #334155; line-height: 1.5; margin: 4px 0 6px 0; }
-				.qf-empty { text-align: center; color: var(--qf-muted); padding: 28px; border: 1px dashed var(--qf-border); border-radius: 10px; font-size: 14px; }
-				.qf-sealed-box {
-					background: #f8fafc; border: 1px dashed var(--qf-border); border-radius: 8px; padding: 16px 18px;
-				}
-				.qf-award-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 4px 0; margin-top: 10px; }
-				.qf-award-box .qf-table td { border-bottom: 1px solid #fde68a; }
+				.qf-summary { font-size: 14px; margin: 4px 0 6px 0; }
+				.qf-empty { text-align: center; color: var(--qf-muted); padding: 20px; border: 1px dashed var(--qf-border); font-size: 14px; }
+				.qf-sealed-box { border: 1px dashed var(--qf-border); padding: 12px 14px; }
+				.qf-award-box { border: 1px solid var(--qf-border); padding: 4px 0; margin-top: 8px; }
 			</style>
 
 			<div class="qf-header">
@@ -144,10 +124,67 @@ function load_buyer_rfqs(wrapper) {
 								<div class="qf-meta-value">${rfq.closing__datetime || "Not specified"}</div>
 							</div>
 						</div>
+						<div class="qf-meta-label">RFQ Type</div>
+						<p class="qf-summary">${rfq.rfq_type}</p>
 						<div class="qf-meta-label">Summary</div>
 						<p class="qf-summary">${rfq.summary || "No summary provided."}</p>
 				`;
 
+				
+
+				if (rfq.rfq_type === "Product") {
+
+					html += "<h3>Requested Items</h3>";
+
+					if (rfq.rfq_items && rfq.rfq_items.length) {
+						html += `
+							<table class="qf-table">
+								<thead>
+									<tr><th>Item</th><th>Qty</th><th>Description</th></tr>
+								</thead>
+								<tbody>
+						`;
+						rfq.rfq_items.forEach(function(item) {
+							html += `
+								<tr>
+									<td>${item.item_name}</td>
+									<td>${item.qty}</td>
+									<td>${item.description || "-"}</td>
+								</tr>
+							`;
+						});
+						html += `</tbody></table>`;
+					} else {
+						html += `<div class="qf-empty">No product items.</div>`;
+					}
+
+				} else {
+
+					html += "<h3>Services Required</h3>";
+
+					if (rfq.service_items && rfq.service_items.length) {
+						html += `
+							<table class="qf-table">
+								<thead>
+									<tr><th>Service</th><th>Description</th></tr>
+								</thead>
+								<tbody>
+						`;
+						rfq.service_items.forEach(function(service) {
+							html += `
+								<tr>
+									<td>${service.service_name}</td>
+									<td>${service.description || "-"}</td>
+								</tr>
+							`;
+						});
+						html += `</tbody></table>`;
+					} else {
+						html += `<div class="qf-empty">No services added.</div>`;
+					}
+				}
+
+			
 				if (rfq.status === "Open") {
 					html += `
 						<div class="qf-sealed-box">
