@@ -9,7 +9,7 @@ frappe.pages['procure_admin'].on_page_load = function(wrapper) {
 	$(wrapper).find('.layout-main-section').html(`
 		
 		<div class="qf-admin">
-			<stylse>
+			<style>
 				.qf-admin {
 					--qf-ink: #222;
 					--qf-muted: #666;
