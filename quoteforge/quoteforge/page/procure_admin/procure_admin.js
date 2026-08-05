@@ -88,8 +88,13 @@ frappe.pages['procure_admin'].on_page_load = function(wrapper) {
 					<button class="qf-btn" id="rfqStatusReport">RFQ Status Report</button>
 					<button class="qf-btn" id="rfqBidSummaryReport">RFQ Bid Summary Report</button>
 					<button class="qf-btn" id="supplierBidReport">Supplier Bid Report</button>
+					<button class="qf-btn" id="awardedrfqReport">Awarded RFQ Report</button>
+					<button class="qf-btn" id="supplierprofilerReport">Supplier Profile Report</button>
+					<button class="qf-btn" id="openDashboard">PROCUREMENT OVERVIEW DASHBOARD</button>
+
 				</div>
 			</div>
+
 
 			<div class="qf-card">
 
@@ -250,6 +255,7 @@ $(wrapper).find("#rfq_type").on("change", function () {
 
 toggleRFQType(wrapper);
 
+    
 	load_rfqs(wrapper);
 	setup_rfq_form(wrapper);
 	setup_report_buttons(wrapper); 
@@ -390,6 +396,23 @@ function setup_report_buttons(wrapper) {
 
 		frappe.set_route("query-report", "Supplier Bid Report");
 
+	});
+
+	$(wrapper).find("#awardedrfqReport").on("click", function()  {
+
+		frappe.set_route("query-report", "Awarded RFQ Report");
+
+		
+	});
+
+	$(wrapper).find("#supplierprofilerReport").on("click", function() {
+
+		frappe.set_route("query-report", "Supplier Profile Report");
+	});
+
+
+	$(wrapper).find("#openDashboard").on("click", function () {
+		frappe.set_route("dashboard-view", "Procurement Overview");
 	});
 
 }
@@ -895,7 +918,7 @@ function toggleRFQType(wrapper) {
         $(wrapper).find("#productSection").hide();
         $(wrapper).find("#serviceSection").show();
 
-        // Product fields not required
+    
         $(wrapper).find("#itemsBody .item_name").prop("required", false);
         $(wrapper).find("#itemsBody .qty").prop("required", false);
 
@@ -905,3 +928,5 @@ function toggleRFQType(wrapper) {
     }
 
 }
+
+
