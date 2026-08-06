@@ -64,7 +64,7 @@
 	.qf-form-actions { display: flex; gap: 8px; margin-top: 4px; }
 </style>
 
-<!-- HEADER -->
+
 <div class="qf-header">
 	<div>
 		<h1>QuoteForge</h1>
@@ -81,11 +81,10 @@
 	</div>
 </div>
 
-<!-- PAGE INTRODUCTION -->
+
 <h2 style="margin-top:20px;">Open Request for Quotations</h2>
 <p class="qf-intro">Review active procurement requests and submit your quotation before the specified closing date.</p>
 
-<!-- RFQ LISTINGS -->
 {% if not rfqs %}
 
 	<div class="qf-empty">
@@ -99,13 +98,12 @@
 
 		<div class="qf-rfq-card">
 
-			<!-- RFQ TITLE + STATUS -->
 			<div class="qf-rfq-head">
 				<h2>{{ rfq.title or rfq.name }}</h2>
 				<span class="qf-pill">OPEN</span>
 			</div>
 
-			<!-- RFQ ID / CLOSING DATE -->
+			
 			<div class="qf-meta-grid">
 				<div>
 					<div class="qf-meta-label">RFQ ID</div>
@@ -117,7 +115,7 @@
 				</div>
 			</div>
 
-			<!-- SUMMARY -->
+			
 			<div class="qf-meta-label">Summary</div>
 			<p class="qf-summary">{{ rfq.summary or "No summary provided." }}</p>
 
@@ -184,7 +182,7 @@
 
 			{% endif %}
 
-			<!-- SUBMIT QUOTATION ACTION -->
+			
 			<div class="qf-cta-box">
 				<h3 style="margin-top:0;">Submit Your Quotation</h3>
 				<p>If you are interested in supplying the requested items, submit your quotation using the form below.</p>
@@ -213,7 +211,7 @@
 
 	<form id="supplierBidForm">
 
-		<!-- RFQ NAME -->
+		
 		<input type="hidden" id="rfq_name">
 
 		<div class="qf-field">
@@ -234,25 +232,25 @@
         readonly>
 </div>
 
-		<!-- PRICE -->
+		
 		<div class="qf-field">
 			<label class="qf-label" for="price">Total Quoted Price ($) *</label>
 			<input type="number" step="0.01" id="price" class="qf-input" required>
 		</div>
 
-		<!-- DELIVERY DAYS -->
+		
 		<div class="qf-field">
 			<label class="qf-label" for="delivery_days">Delivery Lead Time (Days) *</label>
 			<input type="number" id="delivery_days" class="qf-input" required>
 		</div>
 
-		<!-- REMARKS -->
+		
 		<div class="qf-field">
 			<label class="qf-label" for="remarks">Remarks / Terms</label>
 			<textarea id="remarks" class="qf-textarea" rows="4"></textarea>
 		</div>
 
-		<!-- FORM ACTIONS -->
+		
 		<div class="qf-form-actions">
 			<button type="submit" id="submitBidBtn" class="qf-btn qf-btn-primary">Send Quotation</button>
 			<button type="button" class="qf-btn" onclick="closeBidForm()">Cancel</button>
