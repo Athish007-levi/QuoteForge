@@ -2,6 +2,7 @@ import frappe
 import json
 from frappe.auth import LoginManager
 
+
 @frappe.whitelist()
 def submit_supplier_bid(rfq, price, delivery_days, remarks=None):
 
@@ -10,26 +11,35 @@ def submit_supplier_bid(rfq, price, delivery_days, remarks=None):
     if rfq_status != "Open":
         frappe.throw("This RFQ is no longer open for bidding.")
 
+
     supplier = frappe.get_value(
         "Supplier Profile",
-        {
-            "user": frappe.session.user
-        },
-        [
-            "name",
-            "company_name",
-            "email"
-        ],
+        {"user": frappe.session.user},
+        ["name", "company_name", "email"],
         as_dict=True
     )
 
     if not supplier:
         frappe.throw("Supplier Profile not found.")
 
+
+    existing_bid = frappe.db.exists(
+        "Supplier Bid",
+        {
+            "rfq": rfq,
+            "supplier": supplier["name"] 
+        }
+    )
+
+    if existing_bid:
+        frappe.throw("You have already submitted a bid for this RFQ.")
+
+    # Create new bid
     bid = frappe.get_doc({
         "doctype": "Supplier Bid",
         "rfq": rfq,
-        "supplier_name": supplier["company_name"],
+        "supplier": supplier["name"],              
+        "supplier_name": supplier["company_name"], 
         "contact_email": supplier["email"],
         "total_quoted_price": price,
         "delivery_days": delivery_days,
@@ -41,7 +51,7 @@ def submit_supplier_bid(rfq, price, delivery_days, remarks=None):
     return {
         "status": "success",
         "message": "Quotation submitted successfully!"
-    } 
+    }
 
 @frappe.whitelist()
 def create_new_rfq(title, summary, closing_date, rfq_type, items=None, services=None):
@@ -402,6 +412,77 @@ def approve_supplier(supplier):
     supplier_doc.save(ignore_permissions=True)
 
     frappe.db.commit()
+
+    frappe.sendmail(
+    recipients=[supplier_doc.email],
+    subject="Your Supplier Profile Has Been Approved",
+    message=f"""
+    <div style="font-family: Arial, Helvetica, sans-serif; max-width:600px; margin:auto; border:1px solid #e5e5e5; border-radius:8px; overflow:hidden;">
+        
+        <div style="background:#2490ef; padding:20px; text-align:center;">
+            <h2 style="color:#ffffff; margin:0;">
+                Supplier Profile Approved
+            </h2>
+        </div>
+
+        <div style="padding:30px; color:#333333; font-size:15px; line-height:1.7;">
+
+            <p>Dear <strong>{supplier_doc.contact_person}</strong>,</p>
+
+            <p>
+                We are pleased to inform you that your supplier profile has been
+                <strong style="color:green;">approved</strong>.
+            </p>
+
+            <p>You can now log in using the following credentials:</p>
+
+            <table style="width:100%; border-collapse:collapse; margin:20px 0;">
+                <tr>
+                    <td style="padding:10px; border:1px solid #ddd; width:150px;">
+                        <strong>Email</strong>
+                    </td>
+                    <td style="padding:10px; border:1px solid #ddd;">
+                        {supplier_doc.email}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:10px; border:1px solid #ddd;">
+                        <strong>Temporary Password</strong>
+                    </td>
+                    <td style="padding:10px; border:1px solid #ddd; font-weight:bold; color:#2490ef;">
+                        {temporary_password}
+                    </td>
+                </tr>
+            </table>
+
+            <p>
+                <strong>For security reasons, please change your password after your first login.</strong>
+            </p>
+
+            <div style="text-align:center; margin:30px 0;">
+                <a href="http://forge.like:8000/supplier_login"
+                   style="background:#2490ef; color:white; text-decoration:none;
+                          padding:12px 24px; border-radius:5px; display:inline-block;">
+                    Login to Portal
+                </a>
+            </div>
+
+            <p>
+                If you have any questions or require assistance, please contact our support team.
+            </p>
+
+            <p>
+                Regards,<br>
+                <strong>Procurement Team</strong>
+            </p>
+
+        </div>
+
+    </div>
+    """,
+    now=True
+)
+     
 
     return {
         "status": "success",
